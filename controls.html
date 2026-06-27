@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VAULT-v1 | Operating Controls</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --green: #3fb950;
+    --green-dim: #1a3a1f;
+    --yellow: #d29922;
+    --yellow-dim: #3a2a00;
+    --blue: #388bfd;
+    --blue-dim: #0d2050;
+    --purple: #a371f7;
+    --purple-dim: #2a1a4a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; }
+  a { color: var(--green); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; gap: 0; position: sticky; top: 0; z-index: 100; }
+  .nav-brand { font-weight: 700; font-size: 15px; color: var(--green); padding: 14px 16px 14px 0; border-right: 1px solid var(--border); margin-right: 4px; letter-spacing: 0.5px; }
+  .nav-link { padding: 14px 14px; color: var(--muted); font-size: 13px; border-bottom: 2px solid transparent; transition: color 0.15s; }
+  .nav-link:hover { color: var(--text); text-decoration: none; }
+  .nav-link.active { color: var(--text); border-bottom-color: var(--green); }
+  .nav-right { margin-left: auto; font-size: 12px; color: var(--muted); padding: 14px 0; }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
+  .page-header { margin-bottom: 28px; }
+  .page-header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .page-header p { color: var(--muted); font-size: 13px; }
+
+  .section { margin-bottom: 28px; }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid #2a6a30; }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid #0d3080; }
+  .badge-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid #4a2a8a; }
+  .badge-gray { background: #21262d; color: var(--muted); border: 1px solid var(--border); }
+
+  /* AGENT TABLE */
+  .agent-table { width: 100%; border-collapse: collapse; }
+  .agent-table th { text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; padding: 0 0 10px 0; border-bottom: 1px solid var(--border); }
+  .agent-table td { padding: 10px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .agent-table tr:last-child td { border-bottom: none; }
+  .agent-table td:first-child { font-weight: 600; font-size: 13px; color: var(--text); padding-right: 16px; white-space: nowrap; }
+  .agent-table td:nth-child(2) { font-size: 12px; color: var(--muted); padding-right: 16px; }
+  .agent-table td:last-child { font-size: 12px; color: var(--muted); font-style: italic; }
+
+  /* SKILL CHIPS */
+  .skill-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .skill-chip { background: #0d1117; border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; font-size: 11px; color: var(--muted); }
+  .skill-chip.vault { border-color: #2a6a30; color: var(--green); }
+
+  /* RULES */
+  .rule-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-text { font-size: 13px; color: var(--text); }
+  .rule-why { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  /* MEMORY FILES */
+  .mem-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .mem-row:last-child { border-bottom: none; }
+  .mem-file { font-size: 13px; color: var(--text); font-family: 'SF Mono', 'Consolas', monospace; flex: 1; }
+  .mem-desc { font-size: 12px; color: var(--muted); }
+
+  .updated { font-size: 11px; color: var(--muted); text-align: right; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">VAULT-v1</span>
+  <a class="nav-link" href="index.html">Codex</a>
+  <a class="nav-link" href="production.html">Workshop</a>
+  <a class="nav-link active" href="controls.html">Controls</a>
+  <span class="nav-right" id="nav-date"></span>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>Operating Controls</h1>
+    <p>Agent roster · Skills · Memory · Rules · OP_CONTROLS system</p>
+  </div>
+
+  <!-- AGENT ROSTER -->
+  <div class="section">
+    <div class="section-label">Agent Roster</div>
+    <div class="card">
+      <table class="agent-table">
+        <thead>
+          <tr>
+            <th>Agent</th>
+            <th>Skill trigger</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>X11</td>
+            <td>/x11 · "scaffold this"</td>
+            <td>Command center · routes all workspace changes</td>
+          </tr>
+          <tr>
+            <td>Chamberlain</td>
+            <td>/chamberlain · "brief me"</td>
+            <td>Vault intelligence · read-only codex</td>
+          </tr>
+          <tr>
+            <td>Conductor</td>
+            <td>/conductor · complex multi-skill tasks</td>
+            <td>Skill orchestrator · routes to right agents</td>
+          </tr>
+          <tr>
+            <td>Auditor</td>
+            <td>/auditor · "audit my skills"</td>
+            <td>Vault health · live skill grading · integrity</td>
+          </tr>
+          <tr>
+            <td>Mechanic</td>
+            <td>/mechanic · "fix a skill"</td>
+            <td>Skill engineer · builds/repairs .skill files</td>
+          </tr>
+          <tr>
+            <td>Registrar</td>
+            <td>/registrar · "ops" · "operations"</td>
+            <td>Vault operations · CLAUDE.md · memory · SOPs</td>
+          </tr>
+          <tr>
+            <td>Wrap-Up</td>
+            <td>/wrap-up · "end session"</td>
+            <td>Session close · memory capture · daily log</td>
+          </tr>
+          <tr>
+            <td>Scout</td>
+            <td>/scout · "brief me" · "what's happening"</td>
+            <td>Intelligence sweep · Gmail + Calendar + vault</td>
+          </tr>
+          <tr>
+            <td>Projects</td>
+            <td>/projects · "venture status"</td>
+            <td>Venture register · project tracking · next moves</td>
+          </tr>
+          <tr>
+            <td>Archivist</td>
+            <td>/archivist research · /archivist pull</td>
+            <td>Research · web scrape → RESEARCH/Active/</td>
+          </tr>
+          <tr>
+            <td>Bursar</td>
+            <td>/bursar · "budget" · "finances"</td>
+            <td>Financial intelligence · budget · venture modeling</td>
+          </tr>
+          <tr>
+            <td>Foreman</td>
+            <td>/foreman</td>
+            <td>Build execution · PRODUCTION factory tasks</td>
+          </tr>
+          <tr>
+            <td>Workflow-Creator</td>
+            <td>/workflow-creator · "create a workflow"</td>
+            <td>Workflow design · run · index · OP_CONTROLS/workflows/</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INSTALLED SKILLS -->
+  <div class="section">
+    <div class="section-label">Installed Skills — Custom Vault (Pointer Pattern)</div>
+    <div class="card">
+      <div class="skill-list">
+        <span class="skill-chip vault">x11</span>
+        <span class="skill-chip vault">chamberlain</span>
+        <span class="skill-chip vault">conductor</span>
+        <span class="skill-chip vault">auditor</span>
+        <span class="skill-chip vault">mechanic</span>
+        <span class="skill-chip vault">registrar</span>
+        <span class="skill-chip vault">wrap-up</span>
+        <span class="skill-chip vault">scout</span>
+        <span class="skill-chip vault">projects</span>
+        <span class="skill-chip vault">archivist</span>
+        <span class="skill-chip vault">bursar</span>
+        <span class="skill-chip vault">foreman</span>
+        <span class="skill-chip vault">workflow-creator</span>
+        <span class="skill-chip vault">run-prompt</span>
+        <span class="skill-chip vault">create-prompt</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Installed Skills — General</div>
+    <div class="card">
+      <div class="skill-list">
+        <span class="skill-chip">copywriting</span>
+        <span class="skill-chip">offer-creation</span>
+        <span class="skill-chip">cold-outreach</span>
+        <span class="skill-chip">pricing-strategy</span>
+        <span class="skill-chip">landing-pages</span>
+        <span class="skill-chip">fundraising</span>
+        <span class="skill-chip">automation-workflows</span>
+        <span class="skill-chip">social-media</span>
+        <span class="skill-chip">docx</span>
+        <span class="skill-chip">pptx</span>
+        <span class="skill-chip">pdf</span>
+        <span class="skill-chip">xlsx</span>
+        <span class="skill-chip">canvas-design</span>
+        <span class="skill-chip">algorithmic-art</span>
+        <span class="skill-chip">mcp-builder</span>
+        <span class="skill-chip">doc-coauthoring</span>
+        <span class="skill-chip">schedule</span>
+        <span class="skill-chip">info-intake</span>
+        <span class="skill-chip">internal-comms</span>
+        <span class="skill-chip">web-builder</span>
+        <span class="skill-chip">skill-auditor</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEMORY FILES -->
+  <div class="section">
+    <div class="section-label">Memory Files — OP_CONTROLS/Memory/</div>
+    <div class="card">
+      <div class="mem-row">
+        <div>
+          <div class="mem-file">user-profile.md</div>
+          <div class="mem-desc">Dan's role, background, preferences, working style</div>
+        </div>
+      </div>
+      <div class="mem-row">
+        <div>
+          <div class="mem-file">project-context.md</div>
+          <div class="mem-desc">Active ventures, skill setup, key file locations</div>
+        </div>
+      </div>
+      <div class="mem-row">
+        <div>
+          <div class="mem-file">feedback-rules.md</div>
+          <div class="mem-desc">Established behavior rules — applied every session</div>
+        </div>
+      </div>
+      <div class="mem-row">
+        <div>
+          <div class="mem-file">chamberlain-state.md</div>
+          <div class="mem-desc">Vault snapshot written by Chamberlain on each run</div>
+        </div>
+      </div>
+      <div class="mem-row">
+        <div>
+          <div class="mem-file">audit-state.md</div>
+          <div class="mem-desc">Open audit findings and resolution log</div>
+        </div>
+      </div>
+      <div class="mem-row">
+        <div>
+          <div class="mem-file">daily/YYYY-MM-DD.md</div>
+          <div class="mem-desc">Per-session logs written by Wrap-Up</div>
+        </div>
+      </div>
+      <div class="mem-row">
+        <div>
+          <div class="mem-file">SOUL.md</div>
+          <div class="mem-desc">Personality layer — how Claude shows up in this vault</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY RULES -->
+  <div class="section">
+    <div class="section-label">Active Behavior Rules</div>
+    <div class="card">
+      <div class="rule-item">
+        <div class="rule-text">No bullet points in conversational responses — prose only</div>
+        <div class="rule-why">Bullets feel like overhead, not answers</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-text">No recaps after completing work</div>
+        <div class="rule-why">Dan can see what was done — restating wastes time</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-text">Make judgment calls without asking</div>
+        <div class="rule-why">Dan moves fast — only ask when getting it wrong wastes significant effort</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-text">Deliver files, don't describe them</div>
+        <div class="rule-why">The file is the deliverable — always create + present_files</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-text">All skills use the pointer pattern — no exceptions</div>
+        <div class="rule-why">SKILL.md = trigger description + pointer to agent file. Instructions live in the agent .md file</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-text">Never read _archive/ folders</div>
+        <div class="rule-why">Archive = stale. Reading contaminates context</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-text">Outputs go to PRODUCTION/FACTORY/KITCHEN/Output/</div>
+        <div class="rule-why">Organized, OneDrive-synced, findable</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VAULT SYSTEMS -->
+  <div class="section">
+    <div class="section-label">Vault Systems</div>
+    <div class="grid-2">
+      <div class="card" style="padding:14px;">
+        <div style="font-weight:600;font-size:13px;margin-bottom:8px;">HOME</div>
+        <div style="font-size:12px;color:var(--muted);">Landing page, daily brief, dashboards. Entry point for every session.</div>
+      </div>
+      <div class="card" style="padding:14px;">
+        <div style="font-weight:600;font-size:13px;margin-bottom:8px;">RESEARCH</div>
+        <div style="font-size:12px;color:var(--muted);">Active research threads. Archivist writes here. Staging → LIBRARY.</div>
+      </div>
+      <div class="card" style="padding:14px;">
+        <div style="font-weight:600;font-size:13px;margin-bottom:8px;">LIBRARY</div>
+        <div style="font-size:12px;color:var(--muted);">Permanent reference. SOPs, standards, decision log, UI system.</div>
+      </div>
+      <div class="card" style="padding:14px;">
+        <div style="font-weight:600;font-size:13px;margin-bottom:8px;">OP_CONTROLS</div>
+        <div style="font-size:12px;color:var(--muted);">Governance layer. CLAUDE.md, memory files, skill source, workflows.</div>
+      </div>
+      <div class="card" style="padding:14px;">
+        <div style="font-weight:600;font-size:13px;margin-bottom:8px;">PRODUCTION</div>
+        <div style="font-size:12px;color:var(--muted);">Factory zones (KITCHEN, MGMT). Agents: GM, Head Chef, Foreman.</div>
+      </div>
+      <div class="card" style="padding:14px;">
+        <div style="font-weight:600;font-size:13px;margin-bottom:8px;">PROJECTS</div>
+        <div style="font-size:12px;color:var(--muted);">Active ventures. TreeService, BuildOut, Hoen, Fundraising, Agentic OS.</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="updated">Snapshot: June 27, 2026 · Refresh by running /x11 in Cowork</p>
+</div>
+
+<script>
+  const d = new Date();
+  document.getElementById('nav-date').textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+</script>
+</body>
+</html>

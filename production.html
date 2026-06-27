@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VAULT-v1 | Production Workshop</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --green: #3fb950;
+    --green-dim: #1a3a1f;
+    --yellow: #d29922;
+    --yellow-dim: #3a2a00;
+    --blue: #388bfd;
+    --blue-dim: #0d2050;
+    --purple: #a371f7;
+    --purple-dim: #2a1a4a;
+    --orange: #e3912a;
+    --orange-dim: #3a2000;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; }
+  a { color: var(--green); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; gap: 0; position: sticky; top: 0; z-index: 100; }
+  .nav-brand { font-weight: 700; font-size: 15px; color: var(--green); padding: 14px 16px 14px 0; border-right: 1px solid var(--border); margin-right: 4px; letter-spacing: 0.5px; }
+  .nav-link { padding: 14px 14px; color: var(--muted); font-size: 13px; border-bottom: 2px solid transparent; transition: color 0.15s; }
+  .nav-link:hover { color: var(--text); text-decoration: none; }
+  .nav-link.active { color: var(--text); border-bottom-color: var(--green); }
+  .nav-right { margin-left: auto; font-size: 12px; color: var(--muted); padding: 14px 0; }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
+  .page-header { margin-bottom: 28px; }
+  .page-header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .page-header p { color: var(--muted); font-size: 13px; }
+
+  .section { margin-bottom: 28px; }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid #2a6a30; }
+  .badge-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #6a4a00; }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid #0d3080; }
+  .badge-orange { background: var(--orange-dim); color: var(--orange); border: 1px solid #6a3000; }
+  .badge-gray { background: #21262d; color: var(--muted); border: 1px solid var(--border); }
+
+  .row { display: flex; align-items: flex-start; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+  .row:last-child { border-bottom: none; }
+  .row-left { flex: 1; }
+  .row-label { font-size: 13px; color: var(--text); }
+  .row-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .zone-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .zone-name { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+  .zone-desc { font-size: 12px; color: var(--muted); }
+  .zone-agents { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .agent-chip { background: #0d1117; border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; font-size: 11px; color: var(--muted); }
+
+  .shipped-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .shipped-row:last-child { border-bottom: none; }
+  .check { color: var(--green); font-size: 14px; flex-shrink: 0; }
+  .shipped-label { font-size: 13px; color: var(--text); flex: 1; }
+  .shipped-date { font-size: 11px; color: var(--muted); }
+
+  .pipeline-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .pipeline-item:last-child { border-bottom: none; }
+  .pipeline-rank { font-size: 11px; color: var(--muted); }
+  .pipeline-name { font-size: 13px; font-weight: 600; color: var(--text); margin: 2px 0; }
+  .pipeline-note { font-size: 12px; color: var(--muted); }
+
+  .updated { font-size: 11px; color: var(--muted); text-align: right; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">VAULT-v1</span>
+  <a class="nav-link" href="index.html">Codex</a>
+  <a class="nav-link active" href="production.html">Workshop</a>
+  <a class="nav-link" href="controls.html">Controls</a>
+  <span class="nav-right" id="nav-date"></span>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>Production Workshop</h1>
+    <p>Factory state · Build queue · PRODUCTION system</p>
+  </div>
+
+  <!-- KITCHEN STATE -->
+  <div class="section">
+    <div class="section-label">Kitchen — Shipped (GM Approved)</div>
+    <div class="card">
+      <div class="shipped-row">
+        <span class="check">✓</span>
+        <span class="shipped-label">Vault UI system — Snippet + dashboards/boards</span>
+        <span class="shipped-date">Jun 25</span>
+      </div>
+      <div class="shipped-row">
+        <span class="check">✓</span>
+        <span class="shipped-label">Data layer — ventures / budget / action-queue</span>
+        <span class="shipped-date">Jun 25</span>
+      </div>
+      <div class="shipped-row">
+        <span class="check">✓</span>
+        <span class="shipped-label">Agent contracts + reactive integration</span>
+        <span class="shipped-date">Jun 25</span>
+      </div>
+      <div class="shipped-row">
+        <span class="check">✓</span>
+        <span class="shipped-label">Anti-patterns + Integrity checklist</span>
+        <span class="shipped-date">Jun 25</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FACTORY ZONES -->
+  <div class="section">
+    <div class="section-label">Factory Zones</div>
+    <div class="grid-2">
+
+      <div class="zone-card">
+        <div class="zone-name">
+          KITCHEN
+          <span class="badge badge-green">Active</span>
+        </div>
+        <div class="zone-desc">Primary build zone. GM-gated output. Draft → QC → Approval → Ship.</div>
+        <div class="zone-agents">
+          <span class="agent-chip">GM</span>
+          <span class="agent-chip">Head Chef</span>
+          <span class="agent-chip">Foreman</span>
+        </div>
+      </div>
+
+      <div class="zone-card">
+        <div class="zone-name">
+          MANAGEMENT
+          <span class="badge badge-blue">Governance</span>
+        </div>
+        <div class="zone-desc">MGMT.md decisions, promotion gate records, factory coherence.</div>
+        <div class="zone-agents">
+          <span class="agent-chip">GM</span>
+        </div>
+      </div>
+
+      <div class="zone-card">
+        <div class="zone-name">
+          Agentic OS
+          <span class="badge badge-yellow">Build</span>
+        </div>
+        <div class="zone-desc">Vault OS buildout. 4/5 cycles complete. Bootstrap complete Jun 27.</div>
+        <div class="zone-agents">
+          <span class="agent-chip">X11</span>
+          <span class="agent-chip">Conductor</span>
+          <span class="agent-chip">Mechanic</span>
+        </div>
+      </div>
+
+      <div class="zone-card">
+        <div class="zone-name">
+          Ventures
+          <span class="badge badge-orange">Multi-stage</span>
+        </div>
+        <div class="zone-desc">5 active ventures. TreeService (Exploration) → BuildOut (Validation) → Hoen (Operating).</div>
+        <div class="zone-agents">
+          <span class="agent-chip">Projects</span>
+          <span class="agent-chip">Bursar</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PRODUCT PIPELINE -->
+  <div class="section">
+    <div class="section-label">Construction Finance Product Pipeline — Top Bets</div>
+    <div class="card">
+      <div class="pipeline-item">
+        <div class="pipeline-rank">⭐ #1</div>
+        <div class="pipeline-name">Draw Request Automation</div>
+        <div class="pipeline-note">Owner-side · Lender-ready draw packages auto-generated · few solutions exist</div>
+      </div>
+      <div class="pipeline-item">
+        <div class="pipeline-rank">⭐ #2</div>
+        <div class="pipeline-name">Owner's Contingency Intelligence</div>
+        <div class="pipeline-note">Owner-side · Predicts contingency exhaustion across portfolio</div>
+      </div>
+      <div class="pipeline-item">
+        <div class="pipeline-rank">⭐ #3</div>
+        <div class="pipeline-name">Construction Cash-Flow Forecasting Engine</div>
+        <div class="pipeline-note">Owner-side · Rolling projections from schedule + contracts + billing</div>
+      </div>
+      <div class="pipeline-item">
+        <div class="pipeline-rank">#4</div>
+        <div class="pipeline-name">Lender Reporting Automation</div>
+        <div class="pipeline-note">Owner-side · Monthly loan compliance reports · low competition</div>
+      </div>
+      <div class="pipeline-item">
+        <div class="pipeline-rank">#5</div>
+        <div class="pipeline-name">Change Order Analytics</div>
+        <div class="pipeline-note">Owner-side · Predicts change-order patterns / GC exposure</div>
+      </div>
+      <div class="pipeline-item">
+        <div class="pipeline-rank">#6–15</div>
+        <div class="pipeline-name">9 more concepts in backlog</div>
+        <div class="pipeline-note">Retainage, Sub Risk, Contract Intel, Insurance, Portfolio, Closeout, Job Cost, Data Room, Daily Brief</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUILDOUT PLATFORM -->
+  <div class="section">
+    <div class="section-label">BuildOut Platform — Active Venture Detail</div>
+    <div class="card">
+      <div class="row">
+        <div class="row-left">
+          <div class="row-label">Stage</div>
+        </div>
+        <span class="badge badge-blue">Validation</span>
+      </div>
+      <div class="row">
+        <div class="row-left">
+          <div class="row-label">Capital</div>
+          <div class="row-sub">Raising (candidate) — gate: validation complete</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-left">
+          <div class="row-label">Core modules</div>
+          <div class="row-sub">Real-time shared visibility · LMS (OSHA, lien waivers) · Historical cost DB for takeoffs</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-left">
+          <div class="row-label">Dan's edge</div>
+          <div class="row-sub">Lived the problem — financial controls for facility buildouts</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="row-left">
+          <div class="row-label">Next</div>
+          <div class="row-sub">Validate coordination pain with owner-side PMs</div>
+        </div>
+        <span class="badge badge-yellow">Pending</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="updated">Snapshot: June 27, 2026 · Refresh by running /projects in Cowork</p>
+</div>
+
+<script>
+  const d = new Date();
+  document.getElementById('nav-date').textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+</script>
+</body>
+</html>

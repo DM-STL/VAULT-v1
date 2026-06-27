@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VAULT-v1 | Codex</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --green: #3fb950;
+    --green-dim: #1a3a1f;
+    --yellow: #d29922;
+    --yellow-dim: #3a2a00;
+    --blue: #388bfd;
+    --blue-dim: #0d2050;
+    --purple: #a371f7;
+    --purple-dim: #2a1a4a;
+    --red: #f85149;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; }
+  a { color: var(--green); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* NAV */
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; gap: 0; position: sticky; top: 0; z-index: 100; }
+  .nav-brand { font-weight: 700; font-size: 15px; color: var(--green); padding: 14px 16px 14px 0; border-right: 1px solid var(--border); margin-right: 4px; letter-spacing: 0.5px; }
+  .nav-link { padding: 14px 14px; color: var(--muted); font-size: 13px; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+  .nav-link:hover { color: var(--text); text-decoration: none; }
+  .nav-link.active { color: var(--text); border-bottom-color: var(--green); }
+  .nav-right { margin-left: auto; font-size: 12px; color: var(--muted); padding: 14px 0; }
+
+  /* LAYOUT */
+  .page { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
+  .page-header { margin-bottom: 28px; }
+  .page-header h1 { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .page-header p { color: var(--muted); font-size: 13px; }
+
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 14px; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+  .section { margin-bottom: 24px; }
+
+  /* BADGES */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid #2a6a30; }
+  .badge-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #6a4a00; }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid #0d3080; }
+  .badge-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid #4a2a8a; }
+  .badge-gray { background: #21262d; color: var(--muted); border: 1px solid var(--border); }
+
+  /* VENTURE CARDS */
+  .venture-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .venture-name { font-weight: 600; font-size: 14px; color: var(--text); }
+  .venture-type { font-size: 12px; color: var(--muted); }
+  .venture-next { font-size: 12px; color: var(--text); background: #0d1117; border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; margin-top: 4px; }
+  .venture-next-label { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+
+  /* ROWS */
+  .row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .row:last-child { border-bottom: none; }
+  .row-label { font-size: 13px; color: var(--text); flex: 1; }
+  .row-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* SHIPPED */
+  .shipped-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .shipped-row:last-child { border-bottom: none; }
+  .check { color: var(--green); font-size: 14px; flex-shrink: 0; }
+  .shipped-label { font-size: 13px; color: var(--text); }
+  .shipped-date { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+  /* SECTION HEADER */
+  .section-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+
+  /* STAT ROW */
+  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; flex: 1; min-width: 120px; }
+  .stat-num { font-size: 24px; font-weight: 700; color: var(--green); line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* UPDATED */
+  .updated { font-size: 11px; color: var(--muted); text-align: right; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">VAULT-v1</span>
+  <a class="nav-link active" href="index.html">Codex</a>
+  <a class="nav-link" href="production.html">Workshop</a>
+  <a class="nav-link" href="controls.html">Controls</a>
+  <span class="nav-right" id="nav-date"></span>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>Codex</h1>
+    <p>Vault state snapshot · DM-STL · Obsidian Vault OS</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Active Ventures</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">4</div>
+      <div class="stat-label">Items Shipped</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">13</div>
+      <div class="stat-label">Vault Agents</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">15</div>
+      <div class="stat-label">Product Backlog</div>
+    </div>
+  </div>
+
+  <!-- VENTURES -->
+  <div class="section">
+    <div class="section-label">Active Ventures</div>
+    <div class="grid-2">
+
+      <div class="venture-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="venture-name">TreeService</div>
+          <span class="badge badge-yellow">Exploration</span>
+        </div>
+        <div class="venture-type">Operating Business · Bootstrap · St. Louis, MO</div>
+        <div class="venture-next">
+          <div class="venture-next-label">Next milestone</div>
+          Resolve ISA certification path
+        </div>
+      </div>
+
+      <div class="venture-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="venture-name">BuildOut Platform</div>
+          <span class="badge badge-blue">Validation</span>
+        </div>
+        <div class="venture-type">SaaS Product · Capital Raise (candidate)</div>
+        <div class="venture-next">
+          <div class="venture-next-label">Next milestone</div>
+          Validate coordination pain w/ owner-side PMs
+        </div>
+      </div>
+
+      <div class="venture-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="venture-name">Hoen Ventures, LLC</div>
+          <span class="badge badge-green">Operating</span>
+        </div>
+        <div class="venture-type">IP Holding · Patent active</div>
+        <div class="venture-next">
+          <div class="venture-next-label">Next milestone</div>
+          Clarify Patent 1 coverage + commercialization path
+        </div>
+      </div>
+
+      <div class="venture-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="venture-name">Fundraising Track</div>
+          <span class="badge badge-purple">Readiness</span>
+        </div>
+        <div class="venture-type">Capital Raise · Readiness gate</div>
+        <div class="venture-next">
+          <div class="venture-next-label">Next milestone</div>
+          Confirm which venture raises + readiness gate
+        </div>
+      </div>
+
+      <div class="venture-card" style="grid-column: span 1;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="venture-name">Agentic OS</div>
+          <span class="badge badge-blue">Build</span>
+        </div>
+        <div class="venture-type">Internal System · Future product</div>
+        <div class="venture-next">
+          <div class="venture-next-label">Next milestone</div>
+          Complete 5-cycle vault buildout
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PRODUCT BACKLOG HIGHLIGHTS -->
+  <div class="section">
+    <div class="section-label">Top Product Bets (Construction Finance)</div>
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="row-label">⭐ Draw Request Automation</div>
+          <div class="row-sub">Lender-ready draw packages auto-generated · few solutions exist</div>
+        </div>
+        <span class="badge badge-green">Near-term</span>
+      </div>
+      <div class="row">
+        <div>
+          <div class="row-label">⭐ Owner's Contingency Intelligence</div>
+          <div class="row-sub">Predicts contingency exhaustion across portfolio</div>
+        </div>
+        <span class="badge badge-green">Near-term</span>
+      </div>
+      <div class="row">
+        <div>
+          <div class="row-label">⭐ Construction Cash-Flow Forecasting Engine</div>
+          <div class="row-sub">Rolling projections from schedule + contracts + billing</div>
+        </div>
+        <span class="badge badge-green">Near-term</span>
+      </div>
+      <div class="row">
+        <div>
+          <div class="row-label">BuildOut Platform (overlaps)</div>
+          <div class="row-sub">Owner's Capital Portfolio Dashboard + Owner's Intelligence Briefing</div>
+        </div>
+        <span class="badge badge-blue">Active</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FACTORY KITCHEN -->
+  <div class="section">
+    <div class="section-label">Factory Kitchen — Shipped</div>
+    <div class="card">
+      <div class="shipped-row">
+        <span class="check">✓</span>
+        <span class="shipped-label">Vault UI system</span>
+        <span class="shipped-date">Jun 25</span>
+      </div>
+      <div class="shipped-row">
+        <span class="check">✓</span>
+        <span class="shipped-label">Data layer (ventures / budget / action-queue)</span>
+        <span class="shipped-date">Jun 25</span>
+      </div>
+      <div class="shipped-row">
+        <span class="check">✓</span>
+        <span class="shipped-label">Agent contracts + reactive integration</span>
+        <span class="shipped-date">Jun 25</span>
+      </div>
+      <div class="shipped-row">
+        <span class="check">✓</span>
+        <span class="shipped-label">Anti-patterns + Integrity checklist</span>
+        <span class="shipped-date">Jun 25</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="updated">Snapshot: June 27, 2026 · Refresh by running /chamberlain in Cowork</p>
+</div>
+
+<script>
+  const d = new Date();
+  document.getElementById('nav-date').textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+</script>
+</body>
+</html>

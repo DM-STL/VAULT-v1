@@ -1,266 +1,2246 @@
-<!DOCTYPE html>
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Production Workshop",
+  "schemaVersion": 1,
+  "description": "Live Kanban for PRODUCTION — reads FLOOR/BOARD.md, ventures.md, and Kitchen STATE on open. Owned by Foreman.",
+  "mcpTools": ["mcp__0d3101fa-debc-4c1e-986d-adf89e6c1370__read_file_content"],
+  "mcpServerNames": ["filesystem"]
+}
+</script>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VAULT-v1 | Production Workshop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Production Workshop</title>
 <style>
-  :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --border: #30363d;
-    --text: #c9d1d9;
-    --muted: #8b949e;
-    --green: #3fb950;
-    --green-dim: #1a3a1f;
-    --yellow: #d29922;
-    --yellow-dim: #3a2a00;
-    --blue: #388bfd;
-    --blue-dim: #0d2050;
-    --purple: #a371f7;
-    --purple-dim: #2a1a4a;
-    --orange: #e3912a;
-    --orange-dim: #3a2000;
+:root {
+  color-scheme: light dark;
+  --bg: #f5f4f2;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --border: #e2ddd8;
+  --text: #1a1a1a;
+  --text2: #555;
+  --text3: #999;
+  --accent: #2563eb;
+  --accent-light: #eff6ff;
+  --green: #16a34a;
+  --green-light: #f0fdf4;
+  --yellow: #ca8a04;
+  --yellow-light: #fefce8;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --purple: #7c3aed;
+  --purple-light: #f5f3ff;
+  --orange: #ea580c;
+  --orange-light: #fff7ed;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+  --radius: 8px;
+  --sidebar-w: 220px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111110;
+    --surface: #1c1b1a;
+    --surface2: #252422;
+    --border: #333230;
+    --text: #f0ede8;
+    --text2: #aaa49e;
+    --text3: #666;
+    --accent-light: #1e2a4a;
+    --green-light: #0f2a1a;
+    --yellow-light: #2a2200;
+    --red-light: #2a1010;
+    --purple-light: #1e1530;
+    --orange-light: #2a1400;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; }
-  a { color: var(--green); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+}
+[data-theme="dark"] {
+  --bg: #111110;
+  --surface: #1c1b1a;
+  --surface2: #252422;
+  --border: #333230;
+  --text: #f0ede8;
+  --text2: #aaa49e;
+  --text3: #666;
+  --accent-light: #1e2a4a;
+  --green-light: #0f2a1a;
+  --yellow-light: #2a2200;
+  --red-light: #2a1010;
+  --purple-light: #1e1530;
+  --orange-light: #2a1400;
+}
 
-  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; gap: 0; position: sticky; top: 0; z-index: 100; }
-  .nav-brand { font-weight: 700; font-size: 15px; color: var(--green); padding: 14px 16px 14px 0; border-right: 1px solid var(--border); margin-right: 4px; letter-spacing: 0.5px; }
-  .nav-link { padding: 14px 14px; color: var(--muted); font-size: 13px; border-bottom: 2px solid transparent; transition: color 0.15s; }
-  .nav-link:hover { color: var(--text); text-decoration: none; }
-  .nav-link.active { color: var(--text); border-bottom-color: var(--green); }
-  .nav-right { margin-left: auto; font-size: 12px; color: var(--muted); padding: 14px 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .page { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
-  .page-header { margin-bottom: 28px; }
-  .page-header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-  .page-header p { color: var(--muted); font-size: 13px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  height: 100dvh;
+  height: -webkit-fill-available;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
 
-  .section { margin-bottom: 28px; }
-  .section-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+/* ── Offline banner ── */
+.offline-banner {
+  display: none;
+  background: var(--yellow-light);
+  border-bottom: 1px solid var(--yellow);
+  color: var(--yellow);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.offline-banner.visible { display: block; }
 
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  padding-top: max(10px, var(--safe-top));
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 10px;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.header-icon { font-size: 16px; }
+.header-title { font-weight: 700; font-size: 14px; letter-spacing: -0.3px; }
+.header-subtitle { color: var(--text3); font-size: 11px; }
+.header-right { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
 
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid #2a6a30; }
-  .badge-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #6a4a00; }
-  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid #0d3080; }
-  .badge-orange { background: var(--orange-dim); color: var(--orange); border: 1px solid #6a3000; }
-  .badge-gray { background: #21262d; color: var(--muted); border: 1px solid var(--border); }
+/* Kitchen state badge */
+.kitchen-badge {
+  font-size: 10px; font-weight: 600; padding: 3px 10px;
+  border-radius: 10px; letter-spacing: 0.3px;
+  background: var(--green-light); color: var(--green);
+  border: 1px solid var(--green);
+  white-space: nowrap;
+}
+.kitchen-badge.loading { background: var(--surface2); color: var(--text3); border-color: var(--border); }
 
-  .row { display: flex; align-items: flex-start; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border); }
-  .row:last-child { border-bottom: none; }
-  .row-left { flex: 1; }
-  .row-label { font-size: 13px; color: var(--text); }
-  .row-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.btn-icon {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 32px; height: 32px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text2);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.1s;
+}
+.btn-icon:hover { background: var(--surface2); }
 
-  .zone-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
-  .zone-name { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
-  .zone-desc { font-size: 12px; color: var(--muted); }
-  .zone-agents { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
-  .agent-chip { background: #0d1117; border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; font-size: 11px; color: var(--muted); }
+.btn-ghost {
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  padding: 5px 10px; cursor: pointer; font-size: 12px; color: var(--text2);
+  display: flex; align-items: center; gap: 5px; height: 32px;
+  white-space: nowrap;
+}
+.btn-ghost:hover { background: var(--surface2); }
 
-  .shipped-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
-  .shipped-row:last-child { border-bottom: none; }
-  .check { color: var(--green); font-size: 14px; flex-shrink: 0; }
-  .shipped-label { font-size: 13px; color: var(--text); flex: 1; }
-  .shipped-date { font-size: 11px; color: var(--muted); }
+/* Search bar */
+.search-bar {
+  display: none;
+  padding: 8px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.search-bar.open { display: flex; }
+.search-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--surface2);
+  color: var(--text);
+  outline: none;
+}
+.search-input:focus { border-color: var(--accent); }
 
-  .pipeline-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
-  .pipeline-item:last-child { border-bottom: none; }
-  .pipeline-rank { font-size: 11px; color: var(--muted); }
-  .pipeline-name { font-size: 13px; font-weight: 600; color: var(--text); margin: 2px 0; }
-  .pipeline-note { font-size: 12px; color: var(--muted); }
+/* ── Layout ── */
+.workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
 
-  .updated { font-size: 11px; color: var(--muted); text-align: right; margin-top: 20px; }
+/* ── Sidebar overlay ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 19;
+}
+.sidebar-overlay.open { display: block; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.22s ease;
+  z-index: 20;
+}
+.sidebar-section {
+  padding: 10px 12px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar-section-right { display: flex; gap: 4px; }
+.sidebar-sort-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 10px; color: var(--text3); padding: 2px 4px;
+  border-radius: 3px;
+}
+.sidebar-sort-btn:hover { background: var(--surface2); color: var(--text2); }
+.sidebar-sort-btn.active { color: var(--accent); }
+
+.sidebar-actions { padding: 8px; border-bottom: 1px solid var(--border); }
+.btn-new {
+  width: 100%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  min-height: 36px;
+}
+.btn-new:hover { background: #1d4ed8; }
+
+.production-list { flex: 1; overflow-y: auto; padding: 4px 6px; }
+.prod-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 12px;
+  margin-bottom: 2px;
+  min-height: 40px;
+}
+.prod-item:hover { background: var(--surface2); color: var(--text); }
+.prod-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+.prod-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.prod-dot.active { background: var(--green); }
+.prod-dot.paused { background: var(--yellow); }
+.prod-dot.done { background: var(--text3); }
+.prod-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prod-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.prod-count {
+  background: var(--border);
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 10px;
+  color: var(--text3);
+}
+.prod-item.active .prod-count { background: #bfdbfe; color: var(--accent); }
+.prod-progress {
+  width: 40px;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.prod-progress-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.sidebar-filter {
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 4px;
+}
+.filter-chip {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 10px;
+  color: var(--text3);
+  cursor: pointer;
+}
+.filter-chip.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
+.sidebar-footer { padding: 8px; border-top: 1px solid var(--border); }
+.vault-path-display {
+  font-size: 10px;
+  color: var(--text3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+.vault-path-display:hover { background: var(--surface2); color: var(--text2); }
+
+/* ── Main area ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Today's Focus strip ── */
+.focus-strip {
+  padding: 8px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: none;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.focus-strip.visible { display: flex; }
+.focus-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.focus-chip {
+  background: var(--orange-light);
+  border: 1px solid var(--orange);
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: var(--orange);
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+.focus-chip:hover { opacity: 0.8; }
+
+/* ── Empty state ── */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+  gap: 12px;
+  padding: 40px;
+}
+.empty-icon { font-size: 40px; }
+.empty-title { font-size: 16px; font-weight: 600; color: var(--text2); }
+.empty-sub { text-align: center; line-height: 1.5; max-width: 280px; }
+.btn-start {
+  background: var(--accent); color: white; border: none; border-radius: 8px;
+  padding: 10px 20px; cursor: pointer; font-size: 13px; font-weight: 600; margin-top: 4px;
+  min-height: 44px;
+}
+.btn-start:hover { background: #1d4ed8; }
+
+/* ── Production view ── */
+.prod-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.prod-header {
+  padding: 12px 16px 10px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.prod-header-info { flex: 1; min-width: 0; }
+.prod-header-name {
+  font-size: 16px; font-weight: 700; letter-spacing: -0.4px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.status-badge {
+  font-size: 10px; font-weight: 600; padding: 2px 8px;
+  border-radius: 10px; letter-spacing: 0.3px; text-transform: uppercase; cursor: pointer;
+}
+.status-badge.active { background: var(--green-light); color: var(--green); }
+.status-badge.paused { background: var(--yellow-light); color: var(--yellow); }
+.status-badge.done { background: var(--surface2); color: var(--text3); }
+.prod-header-meta { font-size: 11px; color: var(--text3); margin-top: 3px; }
+.prod-progress-bar {
+  height: 3px; background: var(--border); border-radius: 2px; margin-top: 6px; overflow: hidden;
+}
+.prod-progress-bar-fill {
+  height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s;
+}
+.prod-header-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+.btn-sm {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+  padding: 5px 10px; cursor: pointer; font-size: 11px; color: var(--text2);
+  min-height: 30px; white-space: nowrap;
+}
+.btn-sm:hover { background: var(--border); }
+.btn-sm.danger { color: var(--red); }
+.btn-sm.danger:hover { background: var(--red-light); border-color: var(--red); }
+
+/* Inline delete confirm */
+.delete-confirm {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--red-light);
+  border: 1px solid var(--red);
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--red);
+}
+.delete-confirm.open { display: flex; }
+.delete-confirm button { background: none; border: none; cursor: pointer; font-size: 11px; font-weight: 600; padding: 0 4px; }
+.delete-yes { color: var(--red) !important; }
+.delete-no { color: var(--text3) !important; }
+
+/* ── Tabs ── */
+.tabs { display: flex; gap: 2px; padding: 0 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.tab {
+  padding: 8px 14px; font-size: 12px; font-weight: 500; color: var(--text3);
+  cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* ── Kanban ── */
+.kanban-wrap {
+  flex: 1; display: flex; overflow: hidden;
+  padding: 12px 12px 0; gap: 10px;
+}
+.kanban-col {
+  flex: 1; display: flex; flex-direction: column;
+  background: var(--surface2); border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden; min-width: 130px;
+}
+.kanban-col-header {
+  padding: 8px 10px 7px; font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
+  text-transform: uppercase; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.col-floor .kanban-col-header { border-top: 2px solid var(--accent); color: var(--accent); }
+.col-ventures .kanban-col-header { border-top: 2px solid var(--purple); color: var(--purple); }
+.col-blocked .kanban-col-header { border-top: 2px solid var(--red); color: var(--red); }
+.col-x11 .kanban-col-header { border-top: 2px solid var(--green); color: var(--green); }
+.col-todo .kanban-col-header { border-top: 2px solid var(--border); }
+.col-doing .kanban-col-header { border-top: 2px solid var(--accent); color: var(--accent); }
+.col-review .kanban-col-header { border-top: 2px solid var(--yellow); color: var(--yellow); }
+.col-done .kanban-col-header { border-top: 2px solid var(--green); color: var(--green); }
+.col-count {
+  background: var(--border); border-radius: 10px; padding: 1px 6px; font-size: 10px;
+}
+.col-doing .col-count { background: var(--accent-light); color: var(--accent); }
+.col-review .col-count { background: var(--yellow-light); color: var(--yellow); }
+.col-done .col-count { background: var(--green-light); color: var(--green); }
+.col-floor .col-count { background: var(--accent-light); color: var(--accent); }
+.col-ventures .col-count { background: var(--purple-light); color: var(--purple); }
+.col-blocked .col-count { background: var(--red-light); color: var(--red); }
+.col-x11 .col-count { background: var(--green-light); color: var(--green); }
+
+.kanban-cards {
+  flex: 1; overflow-y: auto; padding: 8px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 9px 10px; cursor: default;
+  box-shadow: var(--shadow); position: relative; transition: border-color 0.1s, box-shadow 0.1s;
+}
+.card:hover { border-color: var(--accent); box-shadow: var(--shadow-lg); }
+.card.blocked { border-left: 3px solid var(--red); }
+.card-priority-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 6px 0 0 6px; }
+.card-priority-bar.high { background: var(--red); }
+.card-priority-bar.medium { background: var(--yellow); }
+.card-priority-bar.low { background: var(--green); }
+.card-priority-bar.none { display: none; }
+.card-body { padding-left: 4px; }
+.card-title { font-size: 12px; font-weight: 600; line-height: 1.4; }
+.card-subtitle { font-size: 10px; color: var(--text3); margin-top: 3px; }
+.card-due { font-size: 10px; color: var(--text3); margin-top: 3px; }
+.card-due.overdue { color: var(--red); font-weight: 600; }
+.card-due.soon { color: var(--yellow); }
+.card-tags { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.card-tag {
+  background: var(--accent-light); color: var(--accent); font-size: 10px;
+  padding: 1px 6px; border-radius: 4px; font-weight: 500;
+}
+.card-tag.purple { background: var(--purple-light); color: var(--purple); }
+.card-tag.red { background: var(--red-light); color: var(--red); }
+.card-footer { font-size: 10px; color: var(--text3); margin-top: 5px; border-top: 1px solid var(--border); padding-top: 5px; }
+.card-actions {
+  display: flex; gap: 4px; margin-top: 7px; padding-top: 7px;
+  border-top: 1px solid var(--border);
+}
+.card-act-btn {
+  background: none; border: 1px solid var(--border); border-radius: 4px;
+  padding: 2px 7px; font-size: 10px; color: var(--text3); cursor: pointer;
+}
+.card-act-btn:hover { background: var(--surface2); color: var(--text); }
+.card-act-btn.del:hover { background: var(--red-light); border-color: var(--red); color: var(--red); }
+.card-act-btn.advance { color: var(--accent); border-color: var(--accent-light); }
+.card-act-btn.advance:hover { background: var(--accent-light); }
+
+/* Placeholder card */
+.card-placeholder {
+  background: var(--surface2); border: 1px dashed var(--border);
+  border-radius: 6px; padding: 12px 10px; text-align: center;
+  color: var(--text3); font-size: 11px; line-height: 1.5;
+}
+
+.add-card-btn {
+  width: 100%; background: none; border: 1px dashed var(--border); border-radius: 6px;
+  padding: 8px; cursor: pointer; font-size: 11px; color: var(--text3);
+  text-align: center; min-height: 36px;
+}
+.add-card-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+/* ── X11 collapsible panel ── */
+.x11-panel {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+  max-height: 200px;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+.x11-panel.collapsed { max-height: 36px; }
+.x11-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px; cursor: pointer; user-select: none;
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  letter-spacing: 0.4px; text-transform: uppercase;
+}
+.x11-panel-header:hover { background: var(--surface2); }
+.x11-toggle { font-size: 10px; color: var(--text3); }
+.x11-content {
+  padding: 0 14px 10px;
+  font-size: 11px; color: var(--text2); line-height: 1.6;
+  overflow-y: auto; max-height: 160px;
+}
+.x11-content table { width: 100%; border-collapse: collapse; font-size: 10px; }
+.x11-content th { color: var(--text3); font-weight: 600; text-align: left; padding: 2px 6px; border-bottom: 1px solid var(--border); }
+.x11-content td { padding: 3px 6px; border-bottom: 1px solid var(--border); color: var(--text2); }
+
+/* ── Undo toast ── */
+.undo-toast {
+  position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%);
+  background: var(--text); color: var(--surface); border-radius: 8px;
+  padding: 10px 16px; font-size: 12px; display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--shadow-lg); z-index: 100; opacity: 0; pointer-events: none;
+  transition: opacity 0.2s; white-space: nowrap;
+}
+.undo-toast.visible { opacity: 1; pointer-events: auto; }
+.undo-btn { background: none; border: 1px solid var(--surface2); border-radius: 4px; padding: 2px 10px; color: var(--surface); cursor: pointer; font-size: 12px; font-weight: 600; }
+
+/* ── Intake panel ── */
+.intake-panel {
+  border-top: 1px solid var(--border); background: var(--surface);
+  padding: 10px 14px calc(10px + var(--safe-bottom)); flex-shrink: 0;
+}
+.intake-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.intake-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+  text-transform: uppercase; color: var(--text3); display: flex; align-items: center; gap: 6px;
+}
+.intake-row { display: flex; gap: 8px; align-items: flex-end; }
+.intake-textarea {
+  flex: 1; resize: none; border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 10px; font-size: 12px; font-family: inherit;
+  background: var(--surface2); color: var(--text); outline: none;
+  line-height: 1.4; min-height: 44px;
+}
+.intake-textarea:focus { border-color: var(--accent); background: var(--surface); }
+.intake-textarea::placeholder { color: var(--text3); }
+.intake-controls { display: flex; flex-direction: column; gap: 5px; }
+.btn-intake {
+  background: var(--accent); color: white; border: none; border-radius: 6px;
+  padding: 8px 14px; cursor: pointer; font-size: 12px; font-weight: 600;
+  white-space: nowrap; min-height: 36px;
+}
+.btn-intake:hover { background: #1d4ed8; }
+.btn-intake-ghost {
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 12px; cursor: pointer; font-size: 11px; color: var(--text2); white-space: nowrap;
+  min-height: 32px;
+}
+.btn-intake-ghost:hover { background: var(--surface2); }
+
+/* ── Notes tab ── */
+.notes-area { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.notes-toolbar {
+  display: flex; gap: 8px; align-items: center;
+  font-size: 10px; color: var(--text3);
+}
+.notes-autosave { font-size: 10px; color: var(--green); margin-left: auto; }
+.notes-textarea {
+  flex: 1; border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px 14px; font-size: 13px;
+  font-family: 'SF Mono', 'Cascadia Code', 'Courier New', monospace;
+  line-height: 1.6; background: var(--surface); color: var(--text);
+  resize: none; min-height: 200px; outline: none;
+}
+.notes-textarea:focus { border-color: var(--accent); }
+.notes-save-row { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ── Intake tab ── */
+.intake-tab { flex: 1; overflow-y: auto; padding: 14px; }
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px; }
+.form-input {
+  width: 100%; border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 10px; font-size: 13px; font-family: inherit; outline: none;
+  background: var(--surface2); color: var(--text);
+}
+.form-input:focus { border-color: var(--accent); background: var(--surface); }
+.form-select {
+  width: 100%; border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 10px; font-size: 13px; font-family: inherit; outline: none;
+  background: var(--surface2); color: var(--text); cursor: pointer;
+}
+.form-select:focus { border-color: var(--accent); }
+.drop-zone {
+  border: 2px dashed var(--border); border-radius: 8px; padding: 20px;
+  text-align: center; color: var(--text3); font-size: 12px; cursor: pointer;
+  transition: all 0.15s; margin-top: 8px; min-height: 80px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--accent); background: var(--accent-light); color: var(--accent);
+}
+.drop-icon { font-size: 24px; }
+
+/* ── Modal overlay ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+  display: none; align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-overlay.visible { display: flex; }
+
+/* Mobile: bottom sheet */
+@media (max-width: 600px) {
+  .modal-overlay { align-items: flex-end; }
+  .modal {
+    border-radius: 16px 16px 0 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-bottom: calc(24px + var(--safe-bottom)) !important;
+  }
+}
+
+.modal {
+  background: var(--surface); border-radius: 12px; box-shadow: var(--shadow-lg);
+  padding: 22px 24px; width: 380px; max-width: 94vw; max-height: 90dvh; overflow-y: auto;
+}
+.modal-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+.btn-cancel {
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 16px; cursor: pointer; font-size: 13px; color: var(--text2); min-height: 40px;
+}
+.btn-primary {
+  background: var(--accent); color: white; border: none; border-radius: 6px;
+  padding: 8px 18px; cursor: pointer; font-size: 13px; font-weight: 600; min-height: 40px;
+}
+.btn-primary:hover { background: #1d4ed8; }
+.settings-note { font-size: 11px; color: var(--text3); line-height: 1.5; margin-top: 8px; }
+
+/* Priority selector */
+.priority-pills { display: flex; gap: 6px; }
+.priority-pill {
+  flex: 1; padding: 6px 4px; text-align: center; border-radius: 6px;
+  border: 1px solid var(--border); cursor: pointer; font-size: 11px; font-weight: 500;
+  background: var(--surface2); color: var(--text2); transition: all 0.1s;
+}
+.priority-pill[data-p="high"].selected { background: var(--red-light); border-color: var(--red); color: var(--red); }
+.priority-pill[data-p="medium"].selected { background: var(--yellow-light); border-color: var(--yellow); color: var(--yellow); }
+.priority-pill[data-p="low"].selected { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.priority-pill[data-p="none"].selected { background: var(--surface2); border-color: var(--border); color: var(--text3); }
+
+/* ── Markdown export modal ── */
+.code-block {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+  padding: 12px; font-family: monospace; font-size: 11px; white-space: pre-wrap;
+  max-height: 260px; overflow-y: auto; color: var(--text2); line-height: 1.5;
+}
+.copy-btn {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+  padding: 5px 12px; font-size: 11px; cursor: pointer; color: var(--text2);
+}
+.copy-btn:hover { background: var(--border); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+/* ── Scrollbars ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── Mobile hamburger ── */
+#hamburger {
+  display: none; background: none; border: none;
+  cursor: pointer; font-size: 18px; color: var(--text2);
+  padding: 4px 8px; min-width: 36px; min-height: 36px;
+  align-items: center; justify-content: center;
+}
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 700px) {
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    transform: translateX(-100%); z-index: 20;
+  }
+  .sidebar.open { transform: translateX(0); }
+  #hamburger { display: flex; }
+  .header-subtitle { display: none; }
+
+  .workspace { flex-direction: column; }
+  .main { width: 100%; }
+
+  .kanban-wrap {
+    padding: 10px 8px 0; gap: 8px;
+  }
+  .kanban-col { min-width: 150px; }
+
+  .prod-header { flex-direction: column; gap: 8px; }
+  .prod-header-actions { flex-wrap: wrap; }
+
+  .focus-strip { padding: 6px 12px; }
+}
+
+@media (max-width: 480px) {
+  .kanban-wrap { padding: 8px 6px 0; }
+  .kanban-col { min-width: 130px; }
+  .card-actions { gap: 3px; }
+}
 </style>
 </head>
 <body>
 
-<nav>
-  <span class="nav-brand">VAULT-v1</span>
-  <a class="nav-link" href="index.html">Codex</a>
-  <a class="nav-link active" href="production.html">Workshop</a>
-  <a class="nav-link" href="controls.html">Controls</a>
-  <span class="nav-right" id="nav-date"></span>
-</nav>
+<!-- Offline banner -->
+<div class="offline-banner" id="offlineBanner">
+  Offline mode — vault connection unavailable; showing last cached data
+</div>
 
-<div class="page">
-  <div class="page-header">
-    <h1>Production Workshop</h1>
-    <p>Factory state · Build queue · PRODUCTION system</p>
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Undo toast -->
+<div class="undo-toast" id="undoToast">
+  <span id="undoMsg">Task moved</span>
+  <button class="undo-btn" onclick="undoLastMove()">Undo</button>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <button id="hamburger" onclick="openSidebar()">≡</button>
+    <span class="header-icon">⚙</span>
+    <div>
+      <div class="header-title">Production Workshop</div>
+      <div class="header-subtitle">Obsidian — PRODUCTION/</div>
+    </div>
   </div>
+  <div class="header-right">
+    <span class="kitchen-badge loading" id="kitchenBadge">Kitchen: loading…</span>
+    <button class="btn-icon" onclick="toggleSearch()" title="Search (S)">🔍</button>
+    <button class="btn-icon" onclick="toggleDark()" id="darkBtn" title="Toggle dark mode">◑</button>
+    <button class="btn-ghost" onclick="openSettings()">⚙</button>
+    <button class="btn-ghost" onclick="reloadVaultData()">↻ Refresh</button>
+    <button class="btn-ghost" onclick="showExport()">↑ Export</button>
+  </div>
+</div>
 
-  <!-- KITCHEN STATE -->
-  <div class="section">
-    <div class="section-label">Kitchen — Shipped (GM Approved)</div>
-    <div class="card">
-      <div class="shipped-row">
-        <span class="check">✓</span>
-        <span class="shipped-label">Vault UI system — Snippet + dashboards/boards</span>
-        <span class="shipped-date">Jun 25</span>
+<!-- Search bar -->
+<div class="search-bar" id="searchBar">
+  <input class="search-input" id="searchInput" placeholder="Filter productions…" oninput="filterProductions(this.value)" autocomplete="off">
+</div>
+
+<!-- Today's Focus -->
+<div class="focus-strip" id="focusStrip">
+  <span class="focus-label">🎯 Focus</span>
+  <div id="focusChips"></div>
+</div>
+
+<div class="workspace">
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-actions">
+      <button class="btn-new" onclick="newProduction()">+ New Production</button>
+    </div>
+    <div class="sidebar-section">
+      Productions
+      <div class="sidebar-section-right">
+        <button class="sidebar-sort-btn active" id="sort-status" onclick="setSortMode('status')" title="Sort by status">●</button>
+        <button class="sidebar-sort-btn" id="sort-date" onclick="setSortMode('date')" title="Sort by date">⏱</button>
+        <button class="sidebar-sort-btn" id="sort-name" onclick="setSortMode('name')" title="Sort by name">Az</button>
       </div>
-      <div class="shipped-row">
-        <span class="check">✓</span>
-        <span class="shipped-label">Data layer — ventures / budget / action-queue</span>
-        <span class="shipped-date">Jun 25</span>
-      </div>
-      <div class="shipped-row">
-        <span class="check">✓</span>
-        <span class="shipped-label">Agent contracts + reactive integration</span>
-        <span class="shipped-date">Jun 25</span>
-      </div>
-      <div class="shipped-row">
-        <span class="check">✓</span>
-        <span class="shipped-label">Anti-patterns + Integrity checklist</span>
-        <span class="shipped-date">Jun 25</span>
+    </div>
+    <div class="sidebar-filter">
+      <button class="filter-chip active" id="filter-all" onclick="setFilter('all')">All</button>
+      <button class="filter-chip" id="filter-active" onclick="setFilter('active')">Active</button>
+      <button class="filter-chip" id="filter-paused" onclick="setFilter('paused')">Paused</button>
+    </div>
+    <div class="production-list" id="productionList"></div>
+    <div class="sidebar-footer">
+      <div class="vault-path-display" id="vaultPathDisplay" onclick="openSettings()" title="Click to configure vault path">
+        📁 <span id="vaultPathText">Configure vault path →</span>
       </div>
     </div>
   </div>
 
-  <!-- FACTORY ZONES -->
-  <div class="section">
-    <div class="section-label">Factory Zones</div>
-    <div class="grid-2">
-
-      <div class="zone-card">
-        <div class="zone-name">
-          KITCHEN
-          <span class="badge badge-green">Active</span>
-        </div>
-        <div class="zone-desc">Primary build zone. GM-gated output. Draft → QC → Approval → Ship.</div>
-        <div class="zone-agents">
-          <span class="agent-chip">GM</span>
-          <span class="agent-chip">Head Chef</span>
-          <span class="agent-chip">Foreman</span>
-        </div>
-      </div>
-
-      <div class="zone-card">
-        <div class="zone-name">
-          MANAGEMENT
-          <span class="badge badge-blue">Governance</span>
-        </div>
-        <div class="zone-desc">MGMT.md decisions, promotion gate records, factory coherence.</div>
-        <div class="zone-agents">
-          <span class="agent-chip">GM</span>
-        </div>
-      </div>
-
-      <div class="zone-card">
-        <div class="zone-name">
-          Agentic OS
-          <span class="badge badge-yellow">Build</span>
-        </div>
-        <div class="zone-desc">Vault OS buildout. 4/5 cycles complete. Bootstrap complete Jun 27.</div>
-        <div class="zone-agents">
-          <span class="agent-chip">X11</span>
-          <span class="agent-chip">Conductor</span>
-          <span class="agent-chip">Mechanic</span>
-        </div>
-      </div>
-
-      <div class="zone-card">
-        <div class="zone-name">
-          Ventures
-          <span class="badge badge-orange">Multi-stage</span>
-        </div>
-        <div class="zone-desc">5 active ventures. TreeService (Exploration) → BuildOut (Validation) → Hoen (Operating).</div>
-        <div class="zone-agents">
-          <span class="agent-chip">Projects</span>
-          <span class="agent-chip">Bursar</span>
-        </div>
-      </div>
-
+  <!-- Main -->
+  <div class="main" id="mainArea">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🏭</div>
+      <div class="empty-title">No production selected</div>
+      <div class="empty-sub">Start a new production or select one from the sidebar. Each production maps to a folder in your Obsidian vault's PRODUCTION directory.</div>
+      <button class="btn-start" onclick="newProduction()">+ Start Production</button>
     </div>
-  </div>
 
-  <!-- PRODUCT PIPELINE -->
-  <div class="section">
-    <div class="section-label">Construction Finance Product Pipeline — Top Bets</div>
-    <div class="card">
-      <div class="pipeline-item">
-        <div class="pipeline-rank">⭐ #1</div>
-        <div class="pipeline-name">Draw Request Automation</div>
-        <div class="pipeline-note">Owner-side · Lender-ready draw packages auto-generated · few solutions exist</div>
+    <div class="prod-view" id="prodView" style="display:none">
+      <div class="prod-header">
+        <div class="prod-header-info">
+          <div class="prod-header-name">
+            <span id="prodViewName">Project Name</span>
+            <span class="status-badge active" id="prodViewStatus" onclick="cycleProdStatus()" title="Click to change status">Active</span>
+          </div>
+          <div class="prod-header-meta" id="prodViewMeta"></div>
+          <div class="prod-progress-bar"><div class="prod-progress-bar-fill" id="prodProgressBar" style="width:0%"></div></div>
+        </div>
+        <div class="prod-header-actions">
+          <button class="btn-sm" onclick="openInVault()">Open ↗</button>
+          <button class="btn-sm" onclick="clearDone()">Clear done</button>
+          <span class="delete-confirm" id="deleteConfirm">
+            Delete? <button class="delete-yes" onclick="confirmDelete()">Yes</button><button class="delete-no" onclick="cancelDelete()">No</button>
+          </span>
+          <button class="btn-sm danger" id="deleteBtn" onclick="showDeleteConfirm()">Delete</button>
+        </div>
       </div>
-      <div class="pipeline-item">
-        <div class="pipeline-rank">⭐ #2</div>
-        <div class="pipeline-name">Owner's Contingency Intelligence</div>
-        <div class="pipeline-note">Owner-side · Predicts contingency exhaustion across portfolio</div>
-      </div>
-      <div class="pipeline-item">
-        <div class="pipeline-rank">⭐ #3</div>
-        <div class="pipeline-name">Construction Cash-Flow Forecasting Engine</div>
-        <div class="pipeline-note">Owner-side · Rolling projections from schedule + contracts + billing</div>
-      </div>
-      <div class="pipeline-item">
-        <div class="pipeline-rank">#4</div>
-        <div class="pipeline-name">Lender Reporting Automation</div>
-        <div class="pipeline-note">Owner-side · Monthly loan compliance reports · low competition</div>
-      </div>
-      <div class="pipeline-item">
-        <div class="pipeline-rank">#5</div>
-        <div class="pipeline-name">Change Order Analytics</div>
-        <div class="pipeline-note">Owner-side · Predicts change-order patterns / GC exposure</div>
-      </div>
-      <div class="pipeline-item">
-        <div class="pipeline-rank">#6–15</div>
-        <div class="pipeline-name">9 more concepts in backlog</div>
-        <div class="pipeline-note">Retainage, Sub Risk, Contract Intel, Insurance, Portfolio, Closeout, Job Cost, Data Room, Daily Brief</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- BUILDOUT PLATFORM -->
-  <div class="section">
-    <div class="section-label">BuildOut Platform — Active Venture Detail</div>
-    <div class="card">
-      <div class="row">
-        <div class="row-left">
-          <div class="row-label">Stage</div>
-        </div>
-        <span class="badge badge-blue">Validation</span>
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('board', this)">Board</div>
+        <div class="tab" onclick="switchTab('vault', this)">Live Vault</div>
+        <div class="tab" onclick="switchTab('notes', this)">Notes</div>
+        <div class="tab" onclick="switchTab('intake', this)">File Intake</div>
       </div>
-      <div class="row">
-        <div class="row-left">
-          <div class="row-label">Capital</div>
-          <div class="row-sub">Raising (candidate) — gate: validation complete</div>
+
+      <!-- Board (manual tasks) -->
+      <div id="tabBoard" class="kanban-wrap"></div>
+
+      <!-- Live Vault Board -->
+      <div id="tabVault" style="display:none; flex:1; flex-direction:column; overflow:hidden;">
+        <div class="kanban-wrap" id="vaultKanban">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;">Loading vault data…</div>
         </div>
-      </div>
-      <div class="row">
-        <div class="row-left">
-          <div class="row-label">Core modules</div>
-          <div class="row-sub">Real-time shared visibility · LMS (OSHA, lien waivers) · Historical cost DB for takeoffs</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-left">
-          <div class="row-label">Dan's edge</div>
-          <div class="row-sub">Lived the problem — financial controls for facility buildouts</div>
+        <!-- X11 panel -->
+        <div class="x11-panel collapsed" id="x11Panel">
+          <div class="x11-panel-header" onclick="toggleX11Panel()">
+            <span>Last X11 Run</span>
+            <span class="x11-toggle" id="x11Toggle">▲ expand</span>
+          </div>
+          <div class="x11-content" id="x11Content">Loading…</div>
         </div>
       </div>
-      <div class="row">
-        <div class="row-left">
-          <div class="row-label">Next</div>
-          <div class="row-sub">Validate coordination pain with owner-side PMs</div>
+
+      <!-- Notes -->
+      <div id="tabNotes" style="display:none; flex:1; flex-direction:column; overflow:hidden">
+        <div class="notes-area">
+          <div class="notes-toolbar">
+            <span>Running notes for this production.</span>
+            <span class="notes-autosave" id="notesAutosave"></span>
+          </div>
+          <textarea class="notes-textarea" id="prodNotesArea" placeholder="Type notes here…&#10;&#10;Use /file-intake in chat to route files here automatically."></textarea>
+          <div class="notes-save-row">
+            <button class="btn-sm" onclick="saveNotes()">Save</button>
+            <button class="btn-intake" onclick="pushNotesToVault()">Push to vault →</button>
+          </div>
         </div>
-        <span class="badge badge-yellow">Pending</span>
+      </div>
+
+      <!-- Intake -->
+      <div id="tabIntake" style="display:none; flex:1; overflow-y:auto">
+        <div class="intake-tab">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6">
+            Paste content below or drop a file. Claude will route it using <strong>/file-intake</strong>.
+          </div>
+          <div class="form-group">
+            <label class="form-label">Content or description</label>
+            <textarea class="form-input" id="intakeContent" style="height:100px;resize:none;font-family:inherit" placeholder="Paste text, a link, or describe a file to route..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Route to</label>
+            <select class="form-select" id="intakeDestination">
+              <option value="auto">Auto-detect</option>
+              <option value="production">This production's folder</option>
+              <option value="notes">Production notes (_notes.md)</option>
+              <option value="assets">Production assets folder</option>
+              <option value="research">Research library</option>
+              <option value="inbox">Vault inbox</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">File path (optional)</label>
+            <input class="form-input" id="intakeFilePath" type="text" placeholder="e.g. C:\Users\Dan\Downloads\notes.pdf">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
+            <button class="btn-intake" onclick="sendToIntake()">Route via /file-intake</button>
+            <button class="btn-intake-ghost" onclick="clearIntake()">Clear</button>
+          </div>
+          <div class="drop-zone" id="dropZone" onclick="document.getElementById('filePickInput').click()">
+            <div class="drop-icon">📂</div>
+            Drop a file or tap to browse
+            <input type="file" id="filePickInput" style="display:none" onchange="onFileSelected(event)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick intake bar (board + notes) -->
+      <div id="boardIntakeBar" class="intake-panel">
+        <div class="intake-header">
+          <div class="intake-title">⬇ Quick Intake</div>
+          <span style="font-size:10px;color:var(--text3)">/file-intake in chat</span>
+        </div>
+        <div class="intake-row">
+          <textarea class="intake-textarea" id="quickIntakeText" placeholder="Paste content or describe a file to route…" rows="1"></textarea>
+          <div class="intake-controls">
+            <button class="btn-intake" onclick="quickSendToIntake()">Route →</button>
+            <button class="btn-intake-ghost" onclick="openFullIntake()">Options</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+</div>
 
-  <p class="updated">Snapshot: June 27, 2026 · Refresh by running /projects in Cowork</p>
+<!-- New Production Modal -->
+<div class="modal-overlay" id="newProdModal">
+  <div class="modal">
+    <div class="modal-title">New Production</div>
+    <div class="form-group">
+      <label class="form-label">Production Name</label>
+      <input class="form-input" id="newProdName" type="text" placeholder="e.g. Website Redesign, Q3 Report…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <select class="form-select" id="newProdStatus">
+        <option value="active">Active</option>
+        <option value="paused">Paused</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description (optional)</label>
+      <input class="form-input" id="newProdDesc" type="text" placeholder="What is this production?">
+    </div>
+    <div style="background:var(--accent-light);border-radius:6px;padding:10px 12px;font-size:11px;color:var(--accent);margin-top:6px">
+      💡 "Create in Vault" sends <strong>/new-production</strong> to Claude to scaffold the folder.
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('newProdModal')">Cancel</button>
+      <button class="btn-cancel" onclick="createLocalOnly()">Local only</button>
+      <button class="btn-primary" onclick="createInVault()">Create in Vault ↗</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Card Modal -->
+<div class="modal-overlay" id="cardModal">
+  <div class="modal">
+    <div class="modal-title" id="cardModalTitle">Add Task</div>
+    <div class="form-group">
+      <label class="form-label">Task</label>
+      <input class="form-input" id="cardTaskName" type="text" placeholder="What needs to happen?">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Column</label>
+      <select class="form-select" id="cardTaskCol">
+        <option value="todo">To Do</option>
+        <option value="doing">In Progress</option>
+        <option value="review">Review</option>
+        <option value="done">Done</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Priority</label>
+      <div class="priority-pills">
+        <div class="priority-pill selected" data-p="none" onclick="selectPriority('none')">None</div>
+        <div class="priority-pill" data-p="low" onclick="selectPriority('low')">🟢 Low</div>
+        <div class="priority-pill" data-p="medium" onclick="selectPriority('medium')">🟡 Medium</div>
+        <div class="priority-pill" data-p="high" onclick="selectPriority('high')">🔴 High</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Due date (optional)</label>
+      <input class="form-input" id="cardTaskDue" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tags (comma-separated)</label>
+      <input class="form-input" id="cardTaskTags" type="text" placeholder="e.g. copy, design, research">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('cardModal')">Cancel</button>
+      <button class="btn-primary" id="cardSaveBtn" onclick="saveCard()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <div class="modal-title">⚙ Settings</div>
+    <div class="form-group">
+      <label class="form-label">Obsidian Vault Path</label>
+      <input class="form-input" id="settingsVaultPath" type="text" placeholder="e.g. C:\Users\Dan\Documents\Obsidian Vault">
+    </div>
+    <div class="form-group">
+      <label class="form-label">PRODUCTION Folder Name</label>
+      <input class="form-input" id="settingsProdFolder" type="text" placeholder="PRODUCTION">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Research Folder Name</label>
+      <input class="form-input" id="settingsResearchFolder" type="text" placeholder="research">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Import backup JSON</label>
+      <input class="form-input" id="importFile" type="file" accept=".json">
+    </div>
+    <p class="settings-note">Paths are saved in localStorage and used by /file-intake and /new-production. Tell Claude your vault path once to save it to <code>C:\Obsidian Vault\OP_CONTROLS\Memory\user-profile.md</code>.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('settingsModal')">Cancel</button>
+      <button class="btn-cancel" onclick="importBackup()">Import</button>
+      <button class="btn-primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <div class="modal-title">Export</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn-sm" onclick="exportJSON()">↓ JSON backup</button>
+      <button class="btn-sm" onclick="exportMarkdown()">↓ Markdown</button>
+    </div>
+    <div id="exportPreview" style="display:none">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+        <span>Markdown preview</span>
+        <button class="copy-btn" id="copyBtn" onclick="copyMarkdown()">Copy</button>
+      </div>
+      <div class="code-block" id="exportCodeBlock"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('exportModal')">Close</button>
+    </div>
+  </div>
 </div>
 
 <script>
-  const d = new Date();
-  document.getElementById('nav-date').textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+// ─── State ───────────────────────────────────────────────────────────────────
+let state = {
+  productions: [],
+  activeProdId: null,
+  settings: { vaultPath: '', prodFolder: 'PRODUCTION', researchFolder: 'research' },
+  sortMode: 'status',
+  filterMode: 'all',
+};
+
+let _editingCardId = null;
+let _selectedPriority = 'none';
+let _lastMove = null;
+let _undoTimer = null;
+let _notesTimer = null;
+
+// Vault file paths (absolute)
+const VAULT_ROOT = 'C:\\Obsidian Vault';
+const VAULT_FILES = {
+  board:    VAULT_ROOT + '\\PRODUCTION\\FACTORY\\FLOOR\\BOARD.md',
+  ventures: VAULT_ROOT + '\\Agents\\Projects\\data\\ventures.md',
+  state:    VAULT_ROOT + '\\PRODUCTION\\FACTORY\\KITCHEN\\STATE.md',
+};
+
+// ─── MCP file read ────────────────────────────────────────────────────────────
+async function mcpReadFile(filePath) {
+  if (typeof mcp === 'undefined' || !mcp) throw new Error('MCP unavailable');
+  const toolName = 'mcp__0d3101fa-debc-4c1e-986d-adf89e6c1370__read_file_content';
+  if (typeof mcp[toolName] !== 'function') throw new Error('MCP tool not available');
+  const result = await mcp[toolName]({ path: filePath });
+  if (result && result.content) return result.content;
+  if (typeof result === 'string') return result;
+  throw new Error('Empty response from MCP tool');
+}
+
+// ─── Parsers ──────────────────────────────────────────────────────────────────
+
+// Parse BOARD.md markdown table → array of card objects
+// Columns: Table | Status | Phase | Owner | Blocked?
+function parseBoardMd(text) {
+  if (!text || typeof text !== 'string') return [];
+  const lines = text.split('\n');
+  const cards = [];
+  let inTable = false;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('|')) { inTable = false; continue; }
+    const cells = trimmed.split('|').map(c => c.trim()).filter((_, i, arr) => i > 0 && i < arr.length - 1);
+    if (cells.length < 2) continue;
+    // Detect header row
+    if (cells[0].toLowerCase().includes('table') || cells[0].toLowerCase().includes('workstream')) {
+      inTable = true; continue;
+    }
+    // Detect separator row
+    if (cells[0].replace(/[-:]/g, '').trim() === '') continue;
+    if (!inTable) continue;
+    const [table, status, phase, owner, blocked] = cells;
+    if (!table) continue;
+    cards.push({
+      title: table,
+      status: status || '',
+      subtitle: phase || '',
+      footer: owner || '',
+      blocked: blocked && blocked !== '—' && blocked.trim() !== '' ? blocked : null,
+    });
+  }
+  return cards;
+}
+
+// Parse ventures.md → array of card objects from ## Active ventures table
+// Columns: Venture | Type | Stage | Owner entity | Next milestone | Capital | Board
+function parseVenturesMd(text) {
+  if (!text || typeof text !== 'string') return [];
+  const lines = text.split('\n');
+  const cards = [];
+  let inActiveSection = false;
+  let inTable = false;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('## Active ventures')) { inActiveSection = true; continue; }
+    if (inActiveSection && trimmed.startsWith('## ')) { break; } // next section
+    if (!inActiveSection) continue;
+    if (!trimmed.startsWith('|')) { inTable = false; continue; }
+    const cells = trimmed.split('|').map(c => c.trim()).filter((_, i, arr) => i > 0 && i < arr.length - 1);
+    if (cells.length < 2) continue;
+    if (cells[0].toLowerCase().includes('venture')) { inTable = true; continue; }
+    if (cells[0].replace(/[-:]/g, '').trim() === '') continue;
+    if (!inTable) continue;
+    const [venture, type, stage, ownerEntity, nextMilestone, capital] = cells;
+    if (!venture) continue;
+    cards.push({
+      title: venture,
+      status: stage || '',
+      subtitle: nextMilestone || '',
+      footer: capital || '',
+    });
+  }
+  return cards;
+}
+
+// Parse STATE.md → status string for badge
+function parseStateMd(text) {
+  if (!text || typeof text !== 'string') return null;
+  const lines = text.split('\n');
+  // Look for first data row of the table (skip header/separator)
+  let inTable = false;
+  const items = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('|')) { if (inTable) break; continue; }
+    const cells = trimmed.split('|').map(c => c.trim()).filter((_, i, arr) => i > 0 && i < arr.length - 1);
+    if (cells.length < 2) continue;
+    if (cells[0].toLowerCase() === 'item') { inTable = true; continue; }
+    if (cells[0].replace(/[-:]/g, '').trim() === '') continue;
+    if (!inTable) { inTable = true; continue; }
+    const status = cells[1] || '';
+    items.push(status);
+  }
+  if (items.length === 0) return null;
+  // Check if all shipped
+  const allShipped = items.every(s => s.toLowerCase() === 'shipped');
+  if (allShipped) return 'Kitchen: All Shipped';
+  const inProg = items.filter(s => s.toLowerCase() !== 'shipped' && s.toLowerCase() !== '').length;
+  return `Kitchen: ${inProg} in progress`;
+}
+
+// Parse x11 monitor md → extract the "What was done" table as HTML
+function parseX11Md(text) {
+  if (!text || typeof text !== 'string') return '<em>No content</em>';
+  try {
+    // Extract session title
+    const titleMatch = text.match(/^# (.+)$/m);
+    const title = titleMatch ? titleMatch[1] : '';
+    // Extract "What was done" table
+    const sectionMatch = text.match(/## What was done\s*\n([\s\S]*?)(?:\n## |$)/);
+    if (!sectionMatch) {
+      // Fall back to first table found
+      const tableMatch = text.match(/\|[\s\S]*?\n(?:\s*\n|$)/);
+      return `<strong>${escHtml(title)}</strong><br>${tableMatch ? mdTableToHtml(tableMatch[0]) : escHtml(text.slice(0, 300))}`;
+    }
+    return `<strong>${escHtml(title)}</strong><br>${mdTableToHtml(sectionMatch[1])}`;
+  } catch(e) {
+    console.warn('x11 parse error', e);
+    return '<em>Parse error — see console</em>';
+  }
+}
+
+function mdTableToHtml(tableText) {
+  if (!tableText || typeof tableText !== 'string') return '';
+  const lines = tableText.trim().split('\n').filter(l => l.trim().startsWith('|'));
+  if (lines.length < 2) return escHtml(tableText.trim().slice(0, 200));
+  const headers = lines[0].split('|').map(c => c.trim()).filter((_, i, a) => i > 0 && i < a.length - 1);
+  const rows = lines.slice(2).map(l => l.split('|').map(c => c.trim()).filter((_, i, a) => i > 0 && i < a.length - 1));
+  let html = '<table><tr>' + headers.map(h => `<th>${escHtml(h)}</th>`).join('') + '</tr>';
+  for (const row of rows) {
+    html += '<tr>' + row.map(c => `<td>${escHtml(c)}</td>`).join('') + '</tr>';
+  }
+  html += '</table>';
+  return html;
+}
+
+// ─── Vault data load ──────────────────────────────────────────────────────────
+let _mcpAvailable = true;
+
+async function loadVaultData() {
+  setVaultKanbanLoading();
+
+  // Check MCP availability
+  try {
+    _mcpAvailable = typeof mcp !== 'undefined' && mcp !== null;
+  } catch(e) {
+    _mcpAvailable = false;
+  }
+
+  if (!_mcpAvailable) {
+    showOfflineBanner();
+    renderFromCache();
+    return;
+  }
+
+  // Run all four reads concurrently; handle each independently
+  const [boardResult, venturesResult, stateResult] = await Promise.allSettled([
+    mcpReadFile(VAULT_FILES.board),
+    mcpReadFile(VAULT_FILES.ventures),
+    mcpReadFile(VAULT_FILES.state),
+  ]);
+
+  // Kitchen STATE badge
+  if (stateResult.status === 'fulfilled') {
+    const stateText = parseStateMd(stateResult.value);
+    updateKitchenBadge(stateText || 'Kitchen: unknown');
+    localStorage.setItem('pw_cache_state', stateResult.value);
+  } else {
+    console.warn('STATE.md read failed:', stateResult.reason);
+    const cached = localStorage.getItem('pw_cache_state');
+    if (cached) updateKitchenBadge(parseStateMd(cached) || 'Kitchen: cached');
+    else updateKitchenBadge('Kitchen: unavailable');
+  }
+
+  // Parse board
+  let boardCards = [];
+  if (boardResult.status === 'fulfilled') {
+    try {
+      boardCards = parseBoardMd(boardResult.value);
+      localStorage.setItem('pw_cache_board', boardResult.value);
+    } catch(e) { console.warn('BOARD.md parse error', e); }
+  } else {
+    console.warn('BOARD.md read failed:', boardResult.reason);
+    const cached = localStorage.getItem('pw_cache_board');
+    if (cached) { try { boardCards = parseBoardMd(cached); } catch(e) {} }
+  }
+
+  // Parse ventures
+  let ventureCards = [];
+  if (venturesResult.status === 'fulfilled') {
+    try {
+      ventureCards = parseVenturesMd(venturesResult.value);
+      localStorage.setItem('pw_cache_ventures', venturesResult.value);
+    } catch(e) { console.warn('ventures.md parse error', e); }
+  } else {
+    console.warn('ventures.md read failed:', venturesResult.reason);
+    const cached = localStorage.getItem('pw_cache_ventures');
+    if (cached) { try { ventureCards = parseVenturesMd(cached); } catch(e) {} }
+  }
+
+  // X11 — find most recent by trying x11 reads (we stored filename from glob at build time)
+  // Try the known most-recent filename first, fallback to cache
+  let x11Text = null;
+  const x11Filenames = [
+    VAULT_ROOT + '\\OP_CONTROLS\\Monitors\\x11-2026-06-28c.md',
+    VAULT_ROOT + '\\OP_CONTROLS\\Monitors\\x11-2026-06-28b.md',
+    VAULT_ROOT + '\\OP_CONTROLS\\Monitors\\x11-2026-06-28.md',
+    VAULT_ROOT + '\\OP_CONTROLS\\Monitors\\x11-2026-06-27.md',
+  ];
+  for (const f of x11Filenames) {
+    try {
+      x11Text = await mcpReadFile(f);
+      localStorage.setItem('pw_cache_x11', x11Text);
+      break;
+    } catch(e) { /* try next */ }
+  }
+  if (!x11Text) {
+    x11Text = localStorage.getItem('pw_cache_x11');
+  }
+
+  renderVaultKanban(boardCards, ventureCards, boardResult.status, venturesResult.status);
+  renderX11Panel(x11Text);
+}
+
+function renderFromCache() {
+  let boardCards = [], ventureCards = [];
+  const cachedBoard = localStorage.getItem('pw_cache_board');
+  const cachedVentures = localStorage.getItem('pw_cache_ventures');
+  const cachedState = localStorage.getItem('pw_cache_state');
+  const cachedX11 = localStorage.getItem('pw_cache_x11');
+
+  if (cachedBoard) { try { boardCards = parseBoardMd(cachedBoard); } catch(e) {} }
+  if (cachedVentures) { try { ventureCards = parseVenturesMd(cachedVentures); } catch(e) {} }
+  if (cachedState) updateKitchenBadge((parseStateMd(cachedState) || 'Kitchen: cached') + ' (cached)');
+  else updateKitchenBadge('Kitchen: offline');
+
+  renderVaultKanban(boardCards, ventureCards,
+    cachedBoard ? 'fulfilled' : 'rejected',
+    cachedVentures ? 'fulfilled' : 'rejected');
+  renderX11Panel(cachedX11);
+}
+
+function setVaultKanbanLoading() {
+  document.getElementById('vaultKanban').innerHTML =
+    '<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;">Loading vault data…</div>';
+}
+
+function renderVaultKanban(boardCards, ventureCards, boardStatus, venturesStatus) {
+  const blocked = boardCards.filter(c => c.blocked);
+  const floor   = boardCards.filter(c => !c.blocked);
+
+  const wrap = document.getElementById('vaultKanban');
+  wrap.innerHTML = '';
+
+  // Factory Floor column
+  wrap.appendChild(makeVaultCol('col-floor', 'Factory Floor', floor, boardStatus === 'rejected' ? VAULT_FILES.board : null, renderFloorCard));
+  // Ventures column
+  wrap.appendChild(makeVaultCol('col-ventures', 'Ventures', ventureCards, venturesStatus === 'rejected' ? VAULT_FILES.ventures : null, renderVentureCard));
+  // Blocked column
+  wrap.appendChild(makeVaultCol('col-blocked', 'Blocked', blocked, null, renderFloorCard));
+}
+
+function makeVaultCol(cls, label, cards, errorFile, cardRenderer) {
+  const col = document.createElement('div');
+  col.className = 'kanban-col ' + cls;
+  const countClass = cls.split(' ')[0].replace('col-', '');
+  col.innerHTML = `<div class="kanban-col-header">
+    <span>${escHtml(label)}</span>
+    <span class="col-count">${cards.length}</span>
+  </div>
+  <div class="kanban-cards" id="vaultcol_${cls}"></div>`;
+  const cardsEl = col.querySelector('.kanban-cards');
+
+  if (errorFile && cards.length === 0) {
+    renderPlaceholder(cardsEl, errorFile, 'File not found or unreadable');
+  } else if (cards.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'card-placeholder';
+    empty.textContent = 'No items';
+    cardsEl.appendChild(empty);
+  } else {
+    for (const card of cards) {
+      const el = document.createElement('div');
+      el.innerHTML = cardRenderer(card);
+      cardsEl.appendChild(el.firstElementChild);
+    }
+  }
+  return col;
+}
+
+function renderPlaceholder(container, filename, message) {
+  const el = typeof container === 'string' ? document.getElementById(container) : container;
+  if (!el) return;
+  const div = document.createElement('div');
+  div.className = 'card-placeholder';
+  const short = filename.split('\\').pop();
+  div.innerHTML = `No data — <strong>${escHtml(short)}</strong> ${escHtml(message)}`;
+  el.appendChild(div);
+}
+
+function renderFloorCard(card) {
+  const blockedTag = card.blocked ? `<span class="card-tag red">${escHtml(card.blocked)}</span>` : '';
+  const statusTag = card.status ? `<span class="card-tag">${escHtml(card.status)}</span>` : '';
+  return `<div class="card${card.blocked ? ' blocked' : ''}">
+    <div class="card-body">
+      <div class="card-title">${escHtml(card.title)}</div>
+      ${card.subtitle ? `<div class="card-subtitle">${escHtml(card.subtitle)}</div>` : ''}
+      <div class="card-tags">${statusTag}${blockedTag}</div>
+      ${card.footer ? `<div class="card-footer">Owner: ${escHtml(card.footer)}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderVentureCard(card) {
+  const stageTag = card.status ? `<span class="card-tag purple">${escHtml(card.status)}</span>` : '';
+  return `<div class="card">
+    <div class="card-body">
+      <div class="card-title">${escHtml(card.title)}</div>
+      ${card.subtitle ? `<div class="card-subtitle">${escHtml(card.subtitle)}</div>` : ''}
+      <div class="card-tags">${stageTag}</div>
+      ${card.footer ? `<div class="card-footer">Capital: ${escHtml(card.footer)}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ─── Kitchen badge ────────────────────────────────────────────────────────────
+function updateKitchenBadge(text) {
+  const badge = document.getElementById('kitchenBadge');
+  badge.textContent = text;
+  badge.classList.remove('loading');
+}
+
+// ─── X11 panel ────────────────────────────────────────────────────────────────
+function renderX11Panel(text) {
+  const content = document.getElementById('x11Content');
+  if (!text) {
+    content.innerHTML = '<em>No X11 monitor data available</em>';
+    return;
+  }
+  try {
+    content.innerHTML = parseX11Md(text);
+  } catch(e) {
+    console.warn('x11 render error', e);
+    content.innerHTML = '<em>Error rendering X11 data</em>';
+  }
+}
+
+function toggleX11Panel() {
+  const panel = document.getElementById('x11Panel');
+  const toggle = document.getElementById('x11Toggle');
+  const collapsed = panel.classList.toggle('collapsed');
+  toggle.textContent = collapsed ? '▲ expand' : '▼ collapse';
+}
+
+// ─── Offline banner ───────────────────────────────────────────────────────────
+function showOfflineBanner() {
+  document.getElementById('offlineBanner').classList.add('visible');
+}
+
+function hideOfflineBanner() {
+  document.getElementById('offlineBanner').classList.remove('visible');
+}
+
+async function reloadVaultData() {
+  hideOfflineBanner();
+  updateKitchenBadge('Kitchen: loading…');
+  document.getElementById('kitchenBadge').classList.add('loading');
+  await loadVaultData();
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+function init() {
+  // UI preferences only from localStorage
+  const dm = localStorage.getItem('pw_darkmode');
+  if (dm === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+  // Productions data (manual sidebar productions) — kept in localStorage as user-managed data
+  const saved = localStorage.getItem('pw_state_v2') || localStorage.getItem('pw_state');
+  if (saved) {
+    try {
+      const p = JSON.parse(saved);
+      state.productions = (p.productions || []).map(prod => ({
+        ...prod,
+        tasks: (prod.tasks || []).map(t => ({
+          priority: 'none', due: '', ...t
+        }))
+      }));
+      state.settings = { ...state.settings, ...(p.settings || {}) };
+      state.activeProdId = p.activeProdId || null;
+      state.sortMode = p.sortMode || 'status';
+      state.filterMode = p.filterMode || 'all';
+    } catch(e) {}
+  }
+
+  renderSidebar();
+  updateVaultDisplay();
+  setSortMode(state.sortMode, true);
+  setFilter(state.filterMode, true);
+  updateFocusStrip();
+
+  if (state.activeProdId && state.productions.find(p => p.id === state.activeProdId)) {
+    selectProduction(state.activeProdId);
+  }
+}
+
+function saveUIPrefs() {
+  // Save only UI preferences and manual productions — NOT primary board data
+  localStorage.setItem('pw_state_v2', JSON.stringify({
+    productions: state.productions,
+    settings: state.settings,
+    activeProdId: state.activeProdId,
+    sortMode: state.sortMode,
+    filterMode: state.filterMode,
+  }));
+}
+
+// Keep save() as alias for saveUIPrefs so existing callers work
+function save() { saveUIPrefs(); }
+
+// ─── Sidebar ─────────────────────────────────────────────────────────────────
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+function setSortMode(mode, silent) {
+  state.sortMode = mode;
+  document.querySelectorAll('.sidebar-sort-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sort-' + mode)?.classList.add('active');
+  if (!silent) { save(); renderSidebar(); }
+}
+
+function setFilter(f, silent) {
+  state.filterMode = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('filter-' + f)?.classList.add('active');
+  if (!silent) { save(); renderSidebar(); }
+}
+
+function getSortedFiltered(query) {
+  let prods = [...state.productions];
+  if (state.filterMode !== 'all') prods = prods.filter(p => p.status === state.filterMode);
+  if (query) {
+    const q = query.toLowerCase();
+    prods = prods.filter(p => p.name.toLowerCase().includes(q) || (p.desc||'').toLowerCase().includes(q));
+  }
+  const order = { active: 0, paused: 1, done: 2 };
+  if (state.sortMode === 'status') prods.sort((a, b) => (order[a.status]||0) - (order[b.status]||0));
+  if (state.sortMode === 'name') prods.sort((a, b) => a.name.localeCompare(b.name));
+  if (state.sortMode === 'date') prods.sort((a, b) => (b.createdTs||0) - (a.createdTs||0));
+  return prods;
+}
+
+function filterProductions(q) { renderSidebar(q); }
+
+function renderSidebar(q) {
+  const list = document.getElementById('productionList');
+  const prods = getSortedFiltered(q || document.getElementById('searchInput')?.value || '');
+  if (prods.length === 0) {
+    list.innerHTML = '<div style="padding:12px 8px;font-size:11px;color:var(--text3);text-align:center">No productions found</div>';
+    return;
+  }
+  list.innerHTML = prods.map(p => {
+    const tasks = p.tasks || [];
+    const total = tasks.length;
+    const done = tasks.filter(t => t.col === 'done').length;
+    const pct = total > 0 ? Math.round(done / total * 100) : 0;
+    const isActive = p.id === state.activeProdId;
+    return `<div class="prod-item${isActive ? ' active' : ''}" onclick="selectProduction('${p.id}');closeSidebar()">
+      <div class="prod-dot ${p.status}"></div>
+      <div class="prod-name">${escHtml(p.name)}</div>
+      <div class="prod-right">
+        ${total > 0 ? `<div class="prod-count">${done}/${total}</div>` : ''}
+        ${total > 0 ? `<div class="prod-progress"><div class="prod-progress-fill" style="width:${pct}%"></div></div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Select Production ────────────────────────────────────────────────────────
+function selectProduction(id) {
+  state.activeProdId = id;
+  save();
+  renderSidebar();
+  const prod = state.productions.find(p => p.id === id);
+  if (!prod) return;
+  document.getElementById('emptyState').style.display = 'none';
+  const pv = document.getElementById('prodView');
+  pv.style.display = 'flex';
+  pv.style.flexDirection = 'column';
+  document.getElementById('prodViewName').textContent = prod.name;
+  refreshProdHeader(prod);
+  renderKanban(prod);
+  loadNotes(prod);
+  switchTab('board', document.querySelectorAll('.tab')[0]);
+  cancelDelete();
+}
+
+function refreshProdHeader(prod) {
+  const statusEl = document.getElementById('prodViewStatus');
+  statusEl.textContent = prod.status.charAt(0).toUpperCase() + prod.status.slice(1);
+  statusEl.className = `status-badge ${prod.status}`;
+  const tasks = prod.tasks || [];
+  const done = tasks.filter(t => t.col === 'done').length;
+  const pct = tasks.length > 0 ? Math.round(done / tasks.length * 100) : 0;
+  document.getElementById('prodViewMeta').textContent =
+    `Started ${prod.created} · ${tasks.length} task${tasks.length !== 1 ? 's' : ''} · ${done} done · ${pct}%`;
+  document.getElementById('prodProgressBar').style.width = pct + '%';
+}
+
+// ─── Kanban (manual tasks board) ──────────────────────────────────────────────
+const COLS = [
+  { id: 'todo',   label: 'To Do',      cls: 'col-todo' },
+  { id: 'doing',  label: 'In Progress', cls: 'col-doing' },
+  { id: 'review', label: 'Review',     cls: 'col-review' },
+  { id: 'done',   label: 'Done',       cls: 'col-done' },
+];
+
+function renderKanban(prod) {
+  const wrap = document.getElementById('tabBoard');
+  const tasks = prod.tasks || [];
+  wrap.innerHTML = COLS.map(col => {
+    const colTasks = tasks.filter(t => t.col === col.id);
+    return `<div class="kanban-col ${col.cls}">
+      <div class="kanban-col-header">
+        <span>${col.label}</span>
+        <span class="col-count">${colTasks.length}</span>
+      </div>
+      <div class="kanban-cards" id="col_${col.id}">
+        ${colTasks.map(t => renderCard(t, col.id)).join('')}
+        <button class="add-card-btn" onclick="openAddCard('${col.id}')">+ Add task</button>
+      </div>
+    </div>`;
+  }).join('');
+  updateFocusStrip();
+}
+
+function renderCard(task, colId) {
+  const tags = (task.tags || []).filter(Boolean);
+  const dueStr = task.due ? formatDue(task.due) : '';
+  const dueClass = task.due ? getDueClass(task.due) : '';
+  const colOrder = ['todo','doing','review','done'];
+  const nextCol = colOrder[Math.min(colOrder.indexOf(colId) + 1, 3)];
+  const nextLabel = nextCol !== colId ? colOrder[colOrder.indexOf(colId) + 1] : null;
+
+  return `<div class="card" id="card_${task.id}">
+    <div class="card-priority-bar ${task.priority || 'none'}"></div>
+    <div class="card-body">
+      <div class="card-title">${escHtml(task.name)}</div>
+      ${dueStr ? `<div class="card-due ${dueClass}">📅 ${dueStr}</div>` : ''}
+      ${tags.length > 0 ? `<div class="card-tags">${tags.map(t => `<span class="card-tag">${escHtml(t)}</span>`).join('')}</div>` : ''}
+      <div class="card-actions">
+        ${nextLabel ? `<button class="card-act-btn advance" onclick="moveCard('${task.id}','${nextLabel}')">→ ${nextLabel}</button>` : ''}
+        ${colId !== 'todo' ? `<button class="card-act-btn" onclick="moveCardBack('${task.id}')">← back</button>` : ''}
+        <button class="card-act-btn" onclick="openEditCard('${task.id}')">Edit</button>
+        <button class="card-act-btn del" onclick="deleteCard('${task.id}')">✕</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function formatDue(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const now = new Date(); now.setHours(0,0,0,0);
+  const diff = Math.round((d - now) / 86400000);
+  if (diff < 0) return Math.abs(diff) + 'd overdue';
+  if (diff === 0) return 'Due today';
+  if (diff === 1) return 'Due tomorrow';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function getDueClass(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const now = new Date(); now.setHours(0,0,0,0);
+  const diff = Math.round((d - now) / 86400000);
+  if (diff < 0) return 'overdue';
+  if (diff <= 2) return 'soon';
+  return '';
+}
+
+function moveCard(taskId, toColLabel) {
+  const colMap = { 'doing': 'doing', 'In Progress': 'doing', 'review': 'review', 'Review': 'review', 'done': 'done', 'Done': 'done', 'todo': 'todo', 'To Do': 'todo' };
+  const toCol = colMap[toColLabel] || toColLabel;
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  if (!prod) return;
+  const task = (prod.tasks || []).find(t => t.id === taskId);
+  if (!task) return;
+  _lastMove = { taskId, fromCol: task.col };
+  task.col = toCol;
+  save();
+  renderKanban(prod);
+  renderSidebar();
+  refreshProdHeader(prod);
+  showUndoToast(`Moved to ${toColLabel}`);
+}
+
+function moveCardBack(taskId) {
+  const colOrder = ['todo','doing','review','done'];
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  if (!prod) return;
+  const task = (prod.tasks || []).find(t => t.id === taskId);
+  if (!task) return;
+  const idx = colOrder.indexOf(task.col);
+  if (idx <= 0) return;
+  _lastMove = { taskId, fromCol: task.col };
+  task.col = colOrder[idx - 1];
+  save();
+  renderKanban(prod);
+  renderSidebar();
+  refreshProdHeader(prod);
+  showUndoToast('Moved back');
+}
+
+function showUndoToast(msg) {
+  clearTimeout(_undoTimer);
+  document.getElementById('undoMsg').textContent = msg;
+  document.getElementById('undoToast').classList.add('visible');
+  _undoTimer = setTimeout(() => {
+    document.getElementById('undoToast').classList.remove('visible');
+    _lastMove = null;
+  }, 4000);
+}
+
+function undoLastMove() {
+  if (!_lastMove) return;
+  clearTimeout(_undoTimer);
+  document.getElementById('undoToast').classList.remove('visible');
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  if (!prod) return;
+  const task = (prod.tasks || []).find(t => t.id === _lastMove.taskId);
+  if (!task) return;
+  task.col = _lastMove.fromCol;
+  _lastMove = null;
+  save();
+  renderKanban(prod);
+  renderSidebar();
+  refreshProdHeader(prod);
+}
+
+function openAddCard(col) {
+  _editingCardId = null;
+  _selectedPriority = 'none';
+  document.getElementById('cardTaskCol').value = col;
+  document.getElementById('cardTaskName').value = '';
+  document.getElementById('cardTaskTags').value = '';
+  document.getElementById('cardTaskDue').value = '';
+  document.getElementById('cardModalTitle').textContent = 'Add Task';
+  document.getElementById('cardSaveBtn').textContent = 'Add Task';
+  document.querySelectorAll('.priority-pill').forEach(p => {
+    p.classList.toggle('selected', p.dataset.p === 'none');
+  });
+  openModal('cardModal');
+  setTimeout(() => document.getElementById('cardTaskName').focus(), 100);
+}
+
+function openEditCard(taskId) {
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  const task = (prod?.tasks || []).find(t => t.id === taskId);
+  if (!task) return;
+  _editingCardId = taskId;
+  _selectedPriority = task.priority || 'none';
+  document.getElementById('cardTaskName').value = task.name;
+  document.getElementById('cardTaskCol').value = task.col;
+  document.getElementById('cardTaskTags').value = (task.tags || []).join(', ');
+  document.getElementById('cardTaskDue').value = task.due || '';
+  document.getElementById('cardModalTitle').textContent = 'Edit Task';
+  document.getElementById('cardSaveBtn').textContent = 'Save';
+  document.querySelectorAll('.priority-pill').forEach(p => {
+    p.classList.toggle('selected', p.dataset.p === _selectedPriority);
+  });
+  openModal('cardModal');
+  setTimeout(() => document.getElementById('cardTaskName').focus(), 100);
+}
+
+function selectPriority(p) {
+  _selectedPriority = p;
+  document.querySelectorAll('.priority-pill').forEach(el => {
+    el.classList.toggle('selected', el.dataset.p === p);
+  });
+}
+
+function saveCard() {
+  const name = document.getElementById('cardTaskName').value.trim();
+  if (!name) { document.getElementById('cardTaskName').focus(); return; }
+  const col = document.getElementById('cardTaskCol').value;
+  const tags = document.getElementById('cardTaskTags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const due = document.getElementById('cardTaskDue').value;
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  if (!prod) return;
+  if (!prod.tasks) prod.tasks = [];
+
+  if (_editingCardId) {
+    const task = prod.tasks.find(t => t.id === _editingCardId);
+    if (task) { task.name = name; task.col = col; task.tags = tags; task.priority = _selectedPriority; task.due = due; }
+  } else {
+    prod.tasks.push({ id: uid(), name, col, tags, priority: _selectedPriority, due });
+  }
+  save();
+  closeModal('cardModal');
+  renderKanban(prod);
+  renderSidebar();
+  refreshProdHeader(prod);
+}
+
+function deleteCard(taskId) {
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  if (!prod) return;
+  prod.tasks = (prod.tasks || []).filter(t => t.id !== taskId);
+  save();
+  renderKanban(prod);
+  renderSidebar();
+  refreshProdHeader(prod);
+}
+
+function clearDone() {
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  if (!prod) return;
+  const doneCount = (prod.tasks || []).filter(t => t.col === 'done').length;
+  if (doneCount === 0) return;
+  prod.tasks = (prod.tasks || []).filter(t => t.col !== 'done');
+  save();
+  renderKanban(prod);
+  renderSidebar();
+  refreshProdHeader(prod);
+}
+
+// ─── Today's Focus ────────────────────────────────────────────────────────────
+function updateFocusStrip() {
+  const allInProg = [];
+  state.productions.filter(p => p.status === 'active').forEach(prod => {
+    (prod.tasks || []).filter(t => t.col === 'doing').forEach(t => {
+      allInProg.push({ task: t, prod });
+    });
+  });
+  const pOrder = { high: 0, medium: 1, low: 2, none: 3 };
+  allInProg.sort((a, b) => (pOrder[a.task.priority]||3) - (pOrder[b.task.priority]||3));
+  const strip = document.getElementById('focusStrip');
+  const chips = document.getElementById('focusChips');
+  if (allInProg.length === 0) { strip.classList.remove('visible'); return; }
+  strip.classList.add('visible');
+  chips.innerHTML = allInProg.slice(0, 5).map(({ task, prod }) =>
+    `<div class="focus-chip" onclick="selectProduction('${prod.id}')" title="${escHtml(prod.name)}">${escHtml(task.name)}</div>`
+  ).join('');
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const boardEl   = document.getElementById('tabBoard');
+  const vaultEl   = document.getElementById('tabVault');
+  const notesEl   = document.getElementById('tabNotes');
+  const intakeEl  = document.getElementById('tabIntake');
+  const intakeBar = document.getElementById('boardIntakeBar');
+  boardEl.style.display = 'none';
+  vaultEl.style.display = 'none';
+  notesEl.style.display = 'none';
+  intakeEl.style.display = 'none';
+  intakeBar.style.display = 'none';
+  if (name === 'board') {
+    boardEl.style.display = 'flex';
+    intakeBar.style.display = 'block';
+  } else if (name === 'vault') {
+    vaultEl.style.display = 'flex';
+    vaultEl.style.flexDirection = 'column';
+  } else if (name === 'notes') {
+    notesEl.style.display = 'flex';
+    notesEl.style.flexDirection = 'column';
+    intakeBar.style.display = 'block';
+  } else if (name === 'intake') {
+    intakeEl.style.display = 'block';
+  }
+}
+
+// ─── Notes ────────────────────────────────────────────────────────────────────
+function loadNotes(prod) {
+  document.getElementById('prodNotesArea').value = prod.notes || '';
+}
+
+function saveNotes() {
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  if (!prod) return;
+  prod.notes = document.getElementById('prodNotesArea').value;
+  save();
+  document.getElementById('notesAutosave').textContent = 'Saved ✓';
+  setTimeout(() => { document.getElementById('notesAutosave').textContent = ''; }, 2000);
+}
+
+document.getElementById('prodNotesArea').addEventListener('input', () => {
+  clearTimeout(_notesTimer);
+  document.getElementById('notesAutosave').textContent = 'Saving…';
+  _notesTimer = setTimeout(saveNotes, 1000);
+});
+
+function pushNotesToVault() {
+  saveNotes();
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  if (!prod) return;
+  const vp = state.settings.vaultPath || '[VAULT_PATH]';
+  const pf = state.settings.prodFolder || 'PRODUCTION';
+  const notes = prod.notes || '';
+  sendPrompt(`/file-intake Save the following notes to ${vp}\\${pf}\\${prod.name}\\_notes.md — append to the file, do not overwrite:\n\n${notes}`);
+}
+
+// ─── Intake ───────────────────────────────────────────────────────────────────
+function quickSendToIntake() {
+  const text = document.getElementById('quickIntakeText').value.trim();
+  if (!text) return;
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  sendPrompt(`/file-intake ${text}${prod ? ` (current production: ${prod.name})` : ''}`);
+  document.getElementById('quickIntakeText').value = '';
+}
+
+function sendToIntake() {
+  const content = document.getElementById('intakeContent').value.trim();
+  const dest = document.getElementById('intakeDestination').value;
+  const filePath = document.getElementById('intakeFilePath').value.trim();
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  const vp = state.settings.vaultPath || '[VAULT_PATH]';
+  const pf = state.settings.prodFolder || 'PRODUCTION';
+  let destStr = 'Auto-detect the best location in the vault';
+  if (dest === 'production' && prod) destStr = `Route to ${vp}\\${pf}\\${prod.name}\\`;
+  else if (dest === 'notes' && prod) destStr = `Append to ${vp}\\${pf}\\${prod.name}\\_notes.md`;
+  else if (dest === 'assets' && prod) destStr = `Save to ${vp}\\${pf}\\${prod.name}\\assets\\`;
+  else if (dest === 'research') destStr = `Route to ${vp}\\${state.settings.researchFolder || 'research'}\\`;
+  else if (dest === 'inbox') destStr = `Route to ${vp}\\inbox\\`;
+  let cmd = `/file-intake ${destStr}`;
+  if (filePath) cmd += `\nFile: ${filePath}`;
+  if (content) cmd += `\nContent:\n${content}`;
+  sendPrompt(cmd);
+}
+
+function clearIntake() {
+  document.getElementById('intakeContent').value = '';
+  document.getElementById('intakeFilePath').value = '';
+  document.getElementById('intakeDestination').value = 'auto';
+}
+
+function openFullIntake() {
+  const tabs = document.querySelectorAll('.tab');
+  switchTab('intake', tabs[3]);
+  tabs.forEach(t => t.classList.remove('active'));
+  tabs[3].classList.add('active');
+}
+
+function onFileSelected(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  document.getElementById('intakeFilePath').value = file.name;
+  document.getElementById('intakeContent').value = `File: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+  openFullIntake();
+}
+
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    document.getElementById('intakeFilePath').value = file.name;
+    document.getElementById('intakeContent').value = `File: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+  }
+});
+
+// ─── New / Create Production ──────────────────────────────────────────────────
+function newProduction() {
+  document.getElementById('newProdName').value = '';
+  document.getElementById('newProdDesc').value = '';
+  document.getElementById('newProdStatus').value = 'active';
+  openModal('newProdModal');
+  setTimeout(() => document.getElementById('newProdName').focus(), 100);
+}
+
+function createInVault() {
+  const name = document.getElementById('newProdName').value.trim();
+  if (!name) { document.getElementById('newProdName').focus(); return; }
+  const prod = addProduction(name);
+  closeModal('newProdModal');
+  selectProduction(prod.id);
+  sendPrompt(`/new-production ${name}`);
+}
+
+function createLocalOnly() {
+  const name = document.getElementById('newProdName').value.trim();
+  if (!name) { document.getElementById('newProdName').focus(); return; }
+  const prod = addProduction(name);
+  closeModal('newProdModal');
+  selectProduction(prod.id);
+}
+
+function addProduction(name) {
+  const status = document.getElementById('newProdStatus').value;
+  const desc = document.getElementById('newProdDesc').value.trim();
+  const prod = {
+    id: uid(), name: name.trim(), status, desc,
+    created: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    createdTs: Date.now(),
+    tasks: [], notes: ''
+  };
+  state.productions.unshift(prod);
+  save();
+  renderSidebar();
+  updateFocusStrip();
+  return prod;
+}
+
+// ─── Production actions ───────────────────────────────────────────────────────
+function cycleProdStatus() {
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  if (!prod) return;
+  const order = ['active', 'paused', 'done'];
+  prod.status = order[(order.indexOf(prod.status) + 1) % order.length];
+  save();
+  renderSidebar();
+  refreshProdHeader(prod);
+  updateFocusStrip();
+}
+
+function openInVault() {
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  if (!prod) return;
+  const vp = state.settings.vaultPath;
+  const pf = state.settings.prodFolder || 'PRODUCTION';
+  const path = vp ? `${vp}\\${pf}\\${prod.name}` : `${pf}\\${prod.name}`;
+  sendPrompt(`Open the vault folder for production "${prod.name}" at ${path}`);
+}
+
+function showDeleteConfirm() {
+  document.getElementById('deleteConfirm').classList.add('open');
+  document.getElementById('deleteBtn').style.display = 'none';
+}
+function cancelDelete() {
+  document.getElementById('deleteConfirm').classList.remove('open');
+  document.getElementById('deleteBtn').style.display = '';
+}
+function confirmDelete() {
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  if (!prod) return;
+  state.productions = state.productions.filter(p => p.id !== state.activeProdId);
+  state.activeProdId = null;
+  save();
+  renderSidebar();
+  updateFocusStrip();
+  document.getElementById('prodView').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'flex';
+  cancelDelete();
+}
+
+// ─── Settings ─────────────────────────────────────────────────────────────────
+function openSettings() {
+  document.getElementById('settingsVaultPath').value = state.settings.vaultPath || '';
+  document.getElementById('settingsProdFolder').value = state.settings.prodFolder || 'PRODUCTION';
+  document.getElementById('settingsResearchFolder').value = state.settings.researchFolder || 'research';
+  openModal('settingsModal');
+}
+
+function saveSettings() {
+  state.settings.vaultPath = document.getElementById('settingsVaultPath').value.trim();
+  state.settings.prodFolder = document.getElementById('settingsProdFolder').value.trim() || 'PRODUCTION';
+  state.settings.researchFolder = document.getElementById('settingsResearchFolder').value.trim() || 'research';
+  save();
+  updateVaultDisplay();
+  closeModal('settingsModal');
+}
+
+function updateVaultDisplay() {
+  const vp = state.settings.vaultPath;
+  const pf = state.settings.prodFolder || 'PRODUCTION';
+  const el = document.getElementById('vaultPathText');
+  if (vp) {
+    const parts = vp.replace(/\\/g, '/').split('/');
+    el.textContent = `${parts[parts.length - 1]}\\${pf}`;
+  } else {
+    el.textContent = 'Configure vault path →';
+  }
+}
+
+// ─── Search ───────────────────────────────────────────────────────────────────
+function toggleSearch() {
+  const bar = document.getElementById('searchBar');
+  const open = bar.classList.toggle('open');
+  if (open) { setTimeout(() => document.getElementById('searchInput').focus(), 100); }
+  else { document.getElementById('searchInput').value = ''; renderSidebar(); }
+}
+
+// ─── Dark mode ────────────────────────────────────────────────────────────────
+function toggleDark() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (isDark) {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('pw_darkmode', 'light');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('pw_darkmode', 'dark');
+  }
+}
+
+// ─── Export / Import ──────────────────────────────────────────────────────────
+function showExport() {
+  document.getElementById('exportPreview').style.display = 'none';
+  openModal('exportModal');
+}
+
+function exportJSON() {
+  const data = JSON.stringify({ productions: state.productions, settings: state.settings }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'production-workshop-backup.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportMarkdown() {
+  const prod = state.productions.find(p => p.id === state.activeProdId);
+  if (!prod) {
+    alert('Select a production first to export it as Markdown.');
+    return;
+  }
+  const lines = [
+    `# ${prod.name}`,
+    `**Status:** ${prod.status} · **Created:** ${prod.created}`,
+    prod.desc ? `\n${prod.desc}` : '',
+    '',
+  ];
+  const COLS_ORDER = ['todo','doing','review','done'];
+  const COL_LABELS = { todo: 'To Do', doing: 'In Progress', review: 'Review', done: 'Done' };
+  COLS_ORDER.forEach(col => {
+    const tasks = (prod.tasks || []).filter(t => t.col === col);
+    if (tasks.length === 0) return;
+    lines.push(`## ${COL_LABELS[col]}`);
+    tasks.forEach(t => {
+      const due = t.due ? ` (due ${t.due})` : '';
+      const pri = t.priority && t.priority !== 'none' ? ` [${t.priority}]` : '';
+      lines.push(`- [ ] ${t.name}${pri}${due}`);
+      if (t.tags?.length) lines.push(`  - tags: ${t.tags.join(', ')}`);
+    });
+    lines.push('');
+  });
+  if (prod.notes) { lines.push('## Notes', '', prod.notes); }
+  const md = lines.join('\n');
+  const preview = document.getElementById('exportPreview');
+  preview.style.display = 'block';
+  document.getElementById('exportCodeBlock').textContent = md;
+  document.getElementById('copyBtn').textContent = 'Copy';
+  document.getElementById('copyBtn').classList.remove('copied');
+  window._exportMd = md;
+}
+
+function copyMarkdown() {
+  navigator.clipboard.writeText(window._exportMd || '').then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copied'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function importBackup() {
+  const input = document.getElementById('importFile');
+  const file = input.files[0];
+  if (!file) { input.click(); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.productions) {
+        state.productions = data.productions;
+        if (data.settings) state.settings = { ...state.settings, ...data.settings };
+        save(); renderSidebar(); updateVaultDisplay(); updateFocusStrip();
+        closeModal('settingsModal');
+        alert(`Imported ${data.productions.length} production(s).`);
+      }
+    } catch { alert('Invalid backup file.'); }
+  };
+  reader.readAsText(file);
+}
+
+// ─── Modal / keyboard helpers ─────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('visible'); }
+function closeModal(id) { document.getElementById(id).classList.remove('visible'); }
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('visible'); });
+});
+
+document.addEventListener('keydown', e => {
+  const anyModal = document.querySelector('.modal-overlay.visible');
+  if (e.key === 'Escape') {
+    if (anyModal) anyModal.classList.remove('visible');
+    else if (document.getElementById('searchBar').classList.contains('open')) toggleSearch();
+    return;
+  }
+  if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+  if (e.key === 'n' && !e.metaKey && !e.ctrlKey) { e.preventDefault(); newProduction(); }
+  if (e.key === 's' && !e.metaKey && !e.ctrlKey) { e.preventDefault(); toggleSearch(); }
+  if (e.key === 'Enter' && document.getElementById('newProdModal').classList.contains('visible')) createInVault();
+  if (e.key === 'Enter' && document.getElementById('cardModal').classList.contains('visible')) saveCard();
+  if ((e.metaKey || e.ctrlKey) && e.key === 'z') undoLastMove();
+});
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function sendPrompt(text) {
+  if (typeof window.cowork !== 'undefined' && window.cowork?.sendPrompt) {
+    window.cowork.sendPrompt(text);
+  } else {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Copied to clipboard — paste into Claude chat');
+    }).catch(() => {
+      showToast('Paste into Claude: ' + text.slice(0, 60) + '…');
+    });
+  }
+}
+function showToast(msg) {
+  const t = document.getElementById('undoToast');
+  document.getElementById('undoMsg').textContent = msg;
+  document.querySelector('.undo-btn').style.display = 'none';
+  t.classList.add('visible');
+  setTimeout(() => {
+    t.classList.remove('visible');
+    document.querySelector('.undo-btn').style.display = '';
+  }, 3000);
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  loadVaultData();
+});
 </script>
-</body>
-</html>
+</body></html>

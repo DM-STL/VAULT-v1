@@ -1,268 +1,1999 @@
-<!DOCTYPE html>
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Life Os Dashboard",
+  "schemaVersion": 1,
+  "mcpTools": [
+    "mcp__817ffc52-3c7e-4439-9aed-84d62ba06026__notion-fetch",
+    "mcp__817ffc52-3c7e-4439-9aed-84d62ba06026__notion-search",
+    "mcp__6ab08af7-5582-42be-9680-7a6990cb2c96__list_events",
+    "mcp__539edbe1-0281-40ab-8e0c-996a5c14bc59__search_threads"
+  ],
+  "mcpServerNames": [
+    "Notion",
+    "Notion",
+    "Google Calendar",
+    "Gmail"
+  ],
+  "description": "Life OS Dashboard v2 — parchment + stained glass aesthetic. Chamberlain AI digest (cached daily), stat strip, Next Actions from Notion, 14-day calendar timeline, key dates countdown, Quick Capture FAB, Currently Wondering. Wired to Notion, Google Calendar, and Gmail."
+}
+</script>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VAULT-v1 | Codex</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<title>Life OS — Dashboard</title>
 <style>
-  :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --border: #30363d;
-    --text: #c9d1d9;
-    --muted: #8b949e;
-    --green: #3fb950;
-    --green-dim: #1a3a1f;
-    --yellow: #d29922;
-    --yellow-dim: #3a2a00;
-    --blue: #388bfd;
-    --blue-dim: #0d2050;
-    --purple: #a371f7;
-    --purple-dim: #2a1a4a;
-    --red: #f85149;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; }
-  a { color: var(--green); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+:root {
+  color-scheme: light;
+  --pap-0: #f4ead0;
+  --pap-1: #faf2d9;
+  --pap-2: #fcf6e2;
+  --pap-3: #ede0bb;
+  --pap-shadow: rgba(43,24,8,0.15);
+  --lead-0: #0e0805;
+  --lead-1: #2a1c10;
+  --lead-2: #4a3320;
+  --lead-3: #6b4f30;
+  --fg-0: #1c1206;
+  --fg-1: #2a1d10;
+  --fg-2: #5b4831;
+  --fg-3: #8c7551;
+  --fg-4: #b59c70;
+  --acc: #9a6c1e;
+  --acc-deep: #6e4a10;
+  --acc-faint: #c9a26a;
+  --jewel-r: #a02838;
+  --jewel-b: #1c3b86;
+  --jewel-g: #1e6a3c;
+  --jewel-a: #c97a1a;
+  --jewel-p: #5a2a78;
+  --red: #a02838;
+  --amber: #c97a1a;
+  --moss: #1e6a3c;
+  --steel: #1c3b86;
+  --f-serif: "Georgia", serif;
+  --f-mono: "Courier New", monospace;
+  --f-sans: system-ui, -apple-system, sans-serif;
+  --nav-w: 220px;
+  --pad: 20px;
+  --gap: 16px;
+  --bottom-nav-h: 0px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
 
-  /* NAV */
-  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; gap: 0; position: sticky; top: 0; z-index: 100; }
-  .nav-brand { font-weight: 700; font-size: 15px; color: var(--green); padding: 14px 16px 14px 0; border-right: 1px solid var(--border); margin-right: 4px; letter-spacing: 0.5px; }
-  .nav-link { padding: 14px 14px; color: var(--muted); font-size: 13px; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
-  .nav-link:hover { color: var(--text); text-decoration: none; }
-  .nav-link.active { color: var(--text); border-bottom-color: var(--green); }
-  .nav-right { margin-left: auto; font-size: 12px; color: var(--muted); padding: 14px 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* LAYOUT */
-  .page { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
-  .page-header { margin-bottom: 28px; }
-  .page-header h1 { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-  .page-header p { color: var(--muted); font-size: 13px; }
+body {
+  font-family: var(--f-sans);
+  font-size: 13px;
+  color: var(--fg-1);
+  background: var(--pap-0);
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+}
 
-  /* CARDS */
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; }
-  .card-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 14px; }
+/* ── Overlay (mobile sidebar backdrop) ── */
+#sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(14,8,5,0.5);
+  z-index: 19;
+}
+#sidebar-overlay.open { display: block; }
 
-  /* GRID */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  @media (max-width: 640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
-  .section { margin-bottom: 24px; }
+/* ── Sidebar ── */
+#sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: var(--nav-w);
+  background: var(--pap-1);
+  border-right: 1.5px solid var(--lead-1);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  box-shadow: 2px 0 18px var(--pap-shadow);
+  transition: transform 0.22s ease;
+}
 
-  /* BADGES */
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid #2a6a30; }
-  .badge-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #6a4a00; }
-  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid #0d3080; }
-  .badge-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid #4a2a8a; }
-  .badge-gray { background: #21262d; color: var(--muted); border: 1px solid var(--border); }
+.brand {
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--lead-2);
+  padding-top: max(14px, var(--safe-top));
+}
+.brand-inner {
+  background: var(--lead-0);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.brand-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+    rgba(160,40,56,0.4) 0%, rgba(28,59,134,0.4) 25%,
+    rgba(30,106,60,0.4) 50%, rgba(90,42,120,0.4) 75%,
+    rgba(201,122,26,0.4) 100%);
+  opacity: 0.6;
+}
+.brand-plaque {
+  position: relative;
+  background: var(--pap-1);
+  border: 1px solid var(--lead-2);
+  border-radius: 4px;
+  padding: 4px 10px;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  width: 100%;
+}
+.brand-title {
+  font-family: var(--f-serif);
+  font-size: 17px;
+  color: var(--fg-0);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.brand-sub {
+  font-family: var(--f-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.18em;
+  color: var(--fg-3);
+  text-transform: uppercase;
+}
 
-  /* VENTURE CARDS */
-  .venture-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-  .venture-name { font-weight: 600; font-size: 14px; color: var(--text); }
-  .venture-type { font-size: 12px; color: var(--muted); }
-  .venture-next { font-size: 12px; color: var(--text); background: #0d1117; border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; margin-top: 4px; }
-  .venture-next-label { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+.nav-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
-  /* ROWS */
-  .row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .row:last-child { border-bottom: none; }
-  .row-label { font-size: 13px; color: var(--text); flex: 1; }
-  .row-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.nav-sep { height: 1px; background: var(--lead-2); margin: 6px 4px; opacity: 0.4; }
 
-  /* SHIPPED */
-  .shipped-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
-  .shipped-row:last-child { border-bottom: none; }
-  .check { color: var(--green); font-size: 14px; flex-shrink: 0; }
-  .shipped-label { font-size: 13px; color: var(--text); }
-  .shipped-date { font-size: 11px; color: var(--muted); margin-left: auto; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--fg-2);
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+  min-height: 44px;
+}
+.nav-item:hover { background: var(--pap-3); color: var(--fg-0); }
+.nav-item.active {
+  background: var(--lead-0);
+  color: var(--pap-1);
+}
+.nav-item .kbd {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  background: var(--pap-2);
+  color: var(--fg-3);
+  border: 1px solid var(--lead-2);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+.nav-item.active .kbd { background: var(--lead-1); color: var(--fg-4); border-color: var(--lead-2); }
 
-  /* SECTION HEADER */
-  .section-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+.nav-version {
+  padding: 10px 12px;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  color: var(--fg-4);
+  border-top: 1px solid var(--lead-2);
+  opacity: 0.5;
+}
 
-  /* STAT ROW */
-  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; flex: 1; min-width: 120px; }
-  .stat-num { font-size: 24px; font-weight: 700; color: var(--green); line-height: 1; }
-  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+/* ── Main ── */
+#main {
+  margin-left: var(--nav-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: calc(var(--bottom-nav-h) + var(--safe-bottom));
+}
 
-  /* UPDATED */
-  .updated { font-size: 11px; color: var(--muted); text-align: right; margin-top: 20px; }
+/* ── Topbar ── */
+#topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--pap-1);
+  border-bottom: 1px solid var(--lead-2);
+  padding: 0 var(--pad);
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px var(--pap-shadow);
+  padding-top: var(--safe-top);
+  height: calc(44px + var(--safe-top));
+}
+.breadcrumb {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.breadcrumb .cur { color: var(--fg-0); font-weight: 600; }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+}
+.scope-pill {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--lead-2);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.scope-btn {
+  padding: 5px 10px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: var(--fg-3);
+  background: var(--pap-2);
+  border: none;
+  cursor: pointer;
+  border-right: 1px solid var(--lead-2);
+  transition: background 0.1s, color 0.1s;
+  min-height: 30px;
+}
+.scope-btn:last-child { border-right: none; }
+.scope-btn.active { background: var(--lead-0); color: var(--pap-1); }
+.date-badge { font-family: var(--f-mono); font-size: 10px; color: var(--fg-3); }
+
+/* Hamburger */
+#hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: var(--fg-2);
+  font-size: 18px;
+  line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Page ── */
+#page {
+  flex: 1;
+  padding: var(--pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  max-width: 1100px;
+  width: 100%;
+}
+
+/* ── Hero ── */
+.page-hero {
+  border: 1.5px solid var(--lead-1);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.hero-glass {
+  background: linear-gradient(135deg,
+    rgba(160,40,56,0.25) 0%, rgba(28,59,134,0.25) 20%,
+    rgba(30,106,60,0.25) 40%, rgba(201,122,26,0.25) 60%,
+    rgba(90,42,120,0.25) 80%, rgba(160,40,56,0.25) 100%);
+  padding: 3px;
+}
+.hero-inner {
+  background: var(--pap-1);
+  border: 1px solid var(--lead-2);
+  border-radius: 2px;
+  padding: 22px 28px 18px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.hero-eyebrow {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  margin-bottom: 6px;
+}
+.hero-title {
+  font-family: var(--f-serif);
+  font-size: 44px;
+  font-weight: 400;
+  color: var(--fg-0);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.hero-sub {
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--fg-2);
+  margin-top: 5px;
+}
+.hero-meta {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: var(--fg-4);
+  text-align: right;
+  line-height: 1.7;
+  flex-shrink: 0;
+}
+
+/* ── Panel ── */
+.panel {
+  background: var(--pap-1);
+  border: 1.5px solid var(--lead-2);
+  border-radius: 6px;
+  padding: 18px 20px 16px;
+  position: relative;
+  box-shadow: 0 2px 8px var(--pap-shadow);
+  overflow: hidden;
+}
+.panel-eyebrow {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  margin-bottom: 4px;
+}
+.panel-title {
+  font-family: var(--f-serif);
+  font-size: 18px;
+  color: var(--fg-0);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+.panel-rule {
+  height: 1px;
+  background: var(--lead-2);
+  margin: 10px 0 14px;
+  opacity: 0.5;
+}
+.panel-corner {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  opacity: 0.25;
+}
+
+/* ── Stat Strip ── */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap);
+}
+.stat-card {
+  background: var(--pap-1);
+  border: 1.5px solid var(--lead-2);
+  border-radius: 6px;
+  padding: 16px 18px 14px;
+  box-shadow: 0 2px 8px var(--pap-shadow);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 130px;
+}
+.stat-header { display: flex; justify-content: space-between; align-items: center; }
+.stat-domain {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-4);
+}
+.stat-value {
+  font-family: var(--f-serif);
+  font-size: 40px;
+  font-weight: 300;
+  color: var(--fg-0);
+  line-height: 1;
+}
+.stat-detail {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--fg-3);
+  line-height: 1.5;
+}
+.stat-cta {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: var(--acc);
+  margin-top: auto;
+  cursor: pointer;
+}
+.stat-cta:hover { color: var(--acc-deep); text-decoration: underline; }
+.dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+.dot-amber { background: var(--jewel-a); }
+.dot-steel { background: var(--jewel-b); }
+.dot-moss  { background: var(--jewel-g); }
+.dot-dim   { background: var(--fg-4); }
+.dot-red   { background: var(--jewel-r); }
+
+/* ── Digest ── */
+.digest-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+}
+.digest-quadrant { display: flex; flex-direction: column; gap: 6px; }
+.digest-qeye {
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+.digest-qbody {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--fg-2);
+  background: var(--pap-2);
+  border: 1px solid var(--lead-2);
+  border-radius: 5px;
+  padding: 10px 12px;
+  line-height: 1.6;
+  min-height: 60px;
+  flex: 1;
+}
+.digest-qbody .comment { color: var(--fg-4); }
+.digest-footer {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: var(--fg-3);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--lead-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.digest-refresh-btn {
+  background: none;
+  border: 1px solid var(--lead-2);
+  border-radius: 3px;
+  font-family: var(--f-mono);
+  font-size: 9px;
+  color: var(--fg-4);
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.digest-refresh-btn:hover { background: var(--pap-3); color: var(--fg-2); }
+
+/* ── Timeline ── */
+.timeline-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+.timeline-day {
+  min-width: 56px;
+  border: 1px solid var(--lead-2);
+  border-radius: 5px;
+  padding: 10px 6px;
+  text-align: center;
+  background: var(--pap-2);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+  flex-shrink: 0;
+}
+.timeline-day:hover { border-color: var(--acc); background: var(--pap-3); }
+.timeline-day.today {
+  background: var(--lead-0);
+  border-color: var(--lead-0);
+}
+.timeline-day .dow {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-4);
+}
+.timeline-day.today .dow { color: var(--pap-3); }
+.timeline-day .dom {
+  font-family: var(--f-serif);
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--fg-0);
+  line-height: 1;
+}
+.timeline-day.today .dom { color: var(--pap-1); }
+.timeline-day .event-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin: 2px auto 0;
+}
+.timeline-day .ev-label {
+  font-family: var(--f-mono);
+  font-size: 7px;
+  color: var(--fg-4);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 54px;
+}
+.timeline-day.today .ev-label { color: var(--pap-3); opacity: 0.8; }
+
+/* Timeline event tooltip */
+.timeline-tooltip {
+  position: fixed;
+  background: var(--lead-0);
+  color: var(--pap-1);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  z-index: 100;
+  max-width: 240px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  pointer-events: none;
+  display: none;
+}
+.timeline-tooltip.visible { display: block; }
+
+/* ── Key Dates ── */
+.key-dates-list { display: flex; flex-direction: column; gap: 10px; }
+.key-date-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--lead-2);
+  border-radius: 5px;
+  background: var(--pap-2);
+  cursor: pointer;
+  transition: border-color 0.12s;
+  min-height: 44px;
+}
+.key-date-row:hover { border-color: var(--acc); }
+.key-date-row.urgent { border-color: var(--jewel-r); background: rgba(160,40,56,0.05); }
+.key-date-row.soon { border-color: var(--jewel-a); background: rgba(201,122,26,0.05); }
+.key-date-accent {
+  width: 3px;
+  align-self: stretch;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.key-date-label {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-4);
+  margin-bottom: 1px;
+}
+.key-date-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-0);
+}
+.key-date-detail { font-size: 11px; color: var(--fg-3); margin-top: 1px; }
+.key-date-countdown {
+  margin-left: auto;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* ── Next Actions ── */
+.next-actions-list { display: flex; flex-direction: column; gap: 6px; }
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--lead-2);
+  border-radius: 5px;
+  background: var(--pap-2);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+  min-height: 44px;
+  text-decoration: none;
+}
+.action-row:hover { border-color: var(--acc); background: var(--pap-3); }
+.action-check {
+  width: 14px; height: 14px;
+  border: 1.5px solid var(--lead-2);
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.action-title { font-size: 12px; font-weight: 500; color: var(--fg-0); flex: 1; }
+.action-tag {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  color: var(--fg-4);
+  background: var(--pap-3);
+  border: 1px solid var(--lead-2);
+  border-radius: 3px;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+/* ── Two-col / three-col ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--gap); }
+
+/* ── System Map ── */
+.sysmap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.sysmap-agent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--lead-2);
+  border-radius: 5px;
+  background: var(--pap-2);
+}
+.sysmap-num {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  color: var(--fg-4);
+  letter-spacing: 0.05em;
+  padding-top: 2px;
+  flex-shrink: 0;
+  width: 22px;
+}
+.sysmap-name { font-weight: 600; font-size: 12px; color: var(--fg-0); }
+.sysmap-role { font-size: 11px; color: var(--fg-3); margin-top: 1px; }
+.sysmap-owns { font-family: var(--f-mono); font-size: 9.5px; color: var(--acc); margin-top: 3px; }
+
+/* ── Review bar ── */
+.review-bar {
+  background: var(--lead-0);
+  border: 1px solid var(--lead-1);
+  border-radius: 6px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--pap-1);
+}
+.review-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--jewel-a);
+  flex-shrink: 0;
+}
+.review-text { flex: 1; font-size: 12px; line-height: 1.5; }
+.review-text strong { font-weight: 600; color: var(--jewel-a); }
+.review-text .detail { font-size: 11px; color: var(--fg-4); margin-top: 2px; }
+.btn-ghost {
+  border: 1px solid var(--lead-2);
+  border-radius: 4px;
+  padding: 8px 14px;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: var(--pap-1);
+  background: var(--lead-1);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.1s;
+  min-height: 44px;
+}
+.btn-ghost:hover { background: var(--lead-2); }
+
+/* ── Quick Links ── */
+.quick-links {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.quick-link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 12px;
+  border: 1px solid var(--lead-2);
+  border-radius: 5px;
+  background: var(--pap-2);
+  text-decoration: none;
+  color: var(--fg-0);
+  transition: border-color 0.12s, background 0.12s;
+  cursor: pointer;
+  min-height: 60px;
+  justify-content: center;
+}
+.quick-link:hover { border-color: var(--acc); background: var(--pap-3); }
+.quick-link-eye {
+  font-family: var(--f-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--fg-4);
+}
+.quick-link-label { font-size: 13px; font-weight: 600; color: var(--fg-0); }
+
+/* ── Quick Capture ── */
+.capture-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.capture-textarea {
+  width: 100%;
+  min-height: 80px;
+  background: var(--pap-2);
+  border: 1.5px solid var(--lead-2);
+  border-radius: 5px;
+  padding: 12px 14px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--fg-1);
+  resize: vertical;
+  transition: border-color 0.12s;
+  line-height: 1.5;
+}
+.capture-textarea:focus {
+  outline: none;
+  border-color: var(--acc);
+}
+.capture-textarea::placeholder { color: var(--fg-4); }
+.capture-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.capture-send {
+  background: var(--lead-0);
+  border: 1px solid var(--lead-1);
+  border-radius: 4px;
+  padding: 8px 20px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--pap-1);
+  cursor: pointer;
+  transition: background 0.12s;
+  min-height: 44px;
+}
+.capture-send:hover { background: var(--lead-1); }
+.capture-send:disabled { opacity: 0.5; cursor: not-allowed; }
+.capture-status {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: var(--fg-4);
+  flex: 1;
+}
+.capture-status.success { color: var(--jewel-g); }
+.capture-status.error { color: var(--jewel-r); }
+
+/* ── Loading / error states ── */
+.loading {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--fg-4);
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.loading::before {
+  content: '';
+  display: inline-block;
+  width: 8px; height: 8px;
+  border: 1.5px solid var(--fg-4);
+  border-top-color: var(--acc);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-state {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--fg-4);
+  padding: 14px;
+  background: var(--pap-2);
+  border: 1px solid var(--lead-2);
+  border-radius: 5px;
+  text-align: center;
+}
+.empty-state .cta {
+  display: block;
+  margin-top: 6px;
+  color: var(--acc);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ── Notion link ── */
+.notion-link {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  color: var(--acc);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.notion-link:hover { color: var(--acc-deep); text-decoration: underline; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--lead-2); border-radius: 3px; }
+
+/* ── Mobile FAB ── */
+#fab {
+  display: none;
+  position: fixed;
+  bottom: calc(20px + var(--safe-bottom));
+  right: 20px;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--lead-0);
+  border: 2px solid var(--lead-2);
+  color: var(--pap-1);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(14,8,5,0.4);
+  z-index: 30;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, transform 0.12s;
+}
+#fab:hover { background: var(--lead-1); transform: scale(1.05); }
+
+/* ── Mobile Quick Capture Modal ── */
+#capture-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  align-items: flex-end;
+}
+#capture-modal.open { display: flex; }
+#capture-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(14,8,5,0.5);
+}
+#capture-modal-sheet {
+  position: relative;
+  width: 100%;
+  background: var(--pap-1);
+  border-top: 1.5px solid var(--lead-1);
+  border-radius: 16px 16px 0 0;
+  padding: 20px 20px calc(20px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.modal-title {
+  font-family: var(--f-serif);
+  font-size: 18px;
+  color: var(--fg-0);
+  font-weight: 500;
+}
+.modal-close {
+  position: absolute;
+  top: 14px; right: 16px;
+  background: none; border: none;
+  font-size: 20px; color: var(--fg-3);
+  cursor: pointer; padding: 8px;
+  min-width: 44px; min-height: 44px;
+}
+
+/* ── Bottom Nav (mobile) ── */
+#bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: calc(56px + var(--safe-bottom));
+  background: var(--pap-1);
+  border-top: 1.5px solid var(--lead-1);
+  z-index: 20;
+  align-items: flex-start;
+  justify-content: space-around;
+  padding-bottom: var(--safe-bottom);
+  padding-top: 4px;
+}
+.bnav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  min-width: 56px;
+  min-height: 44px;
+  color: var(--fg-3);
+  font-size: 10px;
+  font-family: var(--f-mono);
+  transition: color 0.12s;
+}
+.bnav-item:hover, .bnav-item.active { color: var(--fg-0); }
+.bnav-icon { font-size: 20px; line-height: 1; }
+
+/* ── MOBILE MEDIA QUERY ── */
+@media (max-width: 768px) {
+  :root { --bottom-nav-h: 56px; }
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  #hamburger { display: flex; }
+  #main { margin-left: 0; }
+  #page { padding: 12px; gap: 12px; }
+  .hero-inner { flex-direction: column; align-items: flex-start; padding: 16px 18px 14px; gap: 8px; }
+  .hero-title { font-size: 32px; }
+  .hero-meta { text-align: left; }
+  .stat-strip { grid-template-columns: 1fr 1fr; }
+  .stat-strip .stat-card:last-child { grid-column: span 2; }
+  .two-col { grid-template-columns: 1fr; }
+  .three-col { grid-template-columns: 1fr; }
+  .quick-links { grid-template-columns: repeat(2, 1fr); }
+  .sysmap-grid { grid-template-columns: 1fr; }
+  .digest-grid { grid-template-columns: 1fr; }
+  .timeline-day { min-width: 64px; padding: 12px 8px; }
+  .timeline-day .dom { font-size: 24px; }
+  .review-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .review-bar .btn-ghost { align-self: flex-start; }
+  #bottom-nav { display: flex; }
+  #fab { display: flex; }
+  .nav-item .kbd { display: none; }
+  .stat-value { font-size: 32px; }
+}
+
+@media (max-width: 400px) {
+  .stat-strip { grid-template-columns: 1fr; }
+  .stat-strip .stat-card:last-child { grid-column: span 1; }
+  .quick-links { grid-template-columns: repeat(2, 1fr); }
+}
 </style>
 </head>
 <body>
 
-<nav>
-  <span class="nav-brand">VAULT-v1</span>
-  <a class="nav-link active" href="index.html">Codex</a>
-  <a class="nav-link" href="production.html">Workshop</a>
-  <a class="nav-link" href="controls.html">Controls</a>
-  <span class="nav-right" id="nav-date"></span>
+<!-- Mobile overlay -->
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- Timeline tooltip -->
+<div class="timeline-tooltip" id="timeline-tooltip"></div>
+
+<!-- Sidebar -->
+<nav id="sidebar">
+  <div class="brand">
+    <div class="brand-inner">
+      <div class="brand-plaque">
+        <span class="brand-title">Life OS</span>
+        <span class="brand-sub">Dan McCauley · v2.0</span>
+      </div>
+    </div>
+  </div>
+  <div class="nav-body">
+    <button class="nav-item active" id="nav-dashboard" onclick="navTo('https://www.notion.so/366f3c9fe776812bb1dcf5dd353b202f','nav-dashboard')">
+      Dashboard <span class="kbd">D</span>
+    </button>
+    <button class="nav-item" id="nav-capture" onclick="navTo('https://www.notion.so/366f3c9fe77681fc942ad2542a40e428','nav-capture')">
+      Quick Capture <span class="kbd">C</span>
+    </button>
+    <button class="nav-item" id="nav-calendar" onclick="navTo('https://www.notion.so/366f3c9fe776814ab8a8c411a13f9530','nav-calendar')">
+      Calendar <span class="kbd">K</span>
+    </button>
+    <div class="nav-sep"></div>
+    <button class="nav-item" id="nav-finance" onclick="navTo('https://www.notion.so/366f3c9fe776819bbb13c084bd8e3527','nav-finance')">
+      Finance <span class="kbd">F</span>
+    </button>
+    <button class="nav-item" id="nav-comms" onclick="navTo('https://www.notion.so/366f3c9fe77681c9a369c3c990a70887','nav-comms')">
+      Communications <span class="kbd">M</span>
+    </button>
+    <button class="nav-item" id="nav-contacts" onclick="navTo('https://www.notion.so/366f3c9fe77681cb8e62f598edcc6c98','nav-contacts')">
+      Contacts <span class="kbd">N</span>
+    </button>
+    <button class="nav-item" id="nav-passions" onclick="navTo('https://www.notion.so/366f3c9fe77681cfb9efca8b5300edd0','nav-passions')">
+      Passions <span class="kbd">P</span>
+    </button>
+    <button class="nav-item" id="nav-knowledge" onclick="navTo('https://www.notion.so/366f3c9fe77681e0a843f3cea61767e8','nav-knowledge')">
+      Knowledge <span class="kbd">L</span>
+    </button>
+    <button class="nav-item" id="nav-files" onclick="navTo('https://www.notion.so/366f3c9fe776816a92c7c19c6da769de','nav-files')">
+      Files &amp; Storage <span class="kbd">S</span>
+    </button>
+  </div>
+  <div class="nav-version">v2.0 · keyboard shortcuts active</div>
 </nav>
 
-<div class="page">
-  <div class="page-header">
-    <h1>Codex</h1>
-    <p>Vault state snapshot · DM-STL · Obsidian Vault OS</p>
-  </div>
+<!-- Mobile Bottom Nav -->
+<nav id="bottom-nav">
+  <button class="bnav-item active" onclick="openNotion('https://www.notion.so/366f3c9fe776812bb1dcf5dd353b202f')">
+    <span class="bnav-icon">⌂</span><span>Home</span>
+  </button>
+  <button class="bnav-item" onclick="openNotion('https://www.notion.so/366f3c9fe776814ab8a8c411a13f9530')">
+    <span class="bnav-icon">◑</span><span>Calendar</span>
+  </button>
+  <button class="bnav-item" onclick="openCaptureModal()">
+    <span class="bnav-icon">+</span><span>Capture</span>
+  </button>
+  <button class="bnav-item" onclick="openNotion('https://www.notion.so/366f3c9fe776819bbb13c084bd8e3527')">
+    <span class="bnav-icon">$</span><span>Finance</span>
+  </button>
+  <button class="bnav-item" onclick="openSidebar()">
+    <span class="bnav-icon">≡</span><span>Menu</span>
+  </button>
+</nav>
 
-  <!-- STATS -->
-  <div class="stat-row">
-    <div class="stat">
-      <div class="stat-num">5</div>
-      <div class="stat-label">Active Ventures</div>
+<!-- Main -->
+<div id="main">
+  <!-- Topbar -->
+  <header id="topbar">
+    <div class="topbar-left">
+      <button id="hamburger" onclick="openSidebar()" aria-label="Open menu">≡</button>
+      <div class="breadcrumb">
+        <span>Life OS</span>
+        <span style="color:var(--lead-2)">/</span>
+        <span class="cur">Dashboard</span>
+      </div>
     </div>
-    <div class="stat">
-      <div class="stat-num">4</div>
-      <div class="stat-label">Items Shipped</div>
+    <div class="topbar-right">
+      <div class="scope-pill">
+        <button class="scope-btn active" id="scope-today" onclick="setScope('today')">Today</button>
+        <button class="scope-btn" id="scope-week" onclick="setScope('week')">7 days</button>
+        <button class="scope-btn" id="scope-month" onclick="setScope('month')">30 days</button>
+      </div>
+      <span class="date-badge" id="date-badge"></span>
     </div>
-    <div class="stat">
-      <div class="stat-num">13</div>
-      <div class="stat-label">Vault Agents</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num">15</div>
-      <div class="stat-label">Product Backlog</div>
-    </div>
-  </div>
+  </header>
 
-  <!-- VENTURES -->
-  <div class="section">
-    <div class="section-label">Active Ventures</div>
-    <div class="grid-2">
+  <!-- Page content -->
+  <div id="page">
 
-      <div class="venture-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="venture-name">TreeService</div>
-          <span class="badge badge-yellow">Exploration</span>
-        </div>
-        <div class="venture-type">Operating Business · Bootstrap · St. Louis, MO</div>
-        <div class="venture-next">
-          <div class="venture-next-label">Next milestone</div>
-          Resolve ISA certification path
+    <!-- Hero -->
+    <div class="page-hero">
+      <div class="hero-glass">
+        <div class="hero-inner">
+          <div>
+            <div class="hero-eyebrow" id="hero-eyebrow">Loading…</div>
+            <div class="hero-title">Dashboard.</div>
+            <div class="hero-sub">The single page for the workshop.</div>
+          </div>
+          <div class="hero-meta">
+            VOL · II<br>FOLIO · 001<br>
+            <a class="notion-link" href="https://www.notion.so/366f3c9fe776812bb1dcf5dd353b202f" target="_blank">↗ open in Notion</a>
+          </div>
         </div>
       </div>
-
-      <div class="venture-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="venture-name">BuildOut Platform</div>
-          <span class="badge badge-blue">Validation</span>
-        </div>
-        <div class="venture-type">SaaS Product · Capital Raise (candidate)</div>
-        <div class="venture-next">
-          <div class="venture-next-label">Next milestone</div>
-          Validate coordination pain w/ owner-side PMs
-        </div>
-      </div>
-
-      <div class="venture-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="venture-name">Hoen Ventures, LLC</div>
-          <span class="badge badge-green">Operating</span>
-        </div>
-        <div class="venture-type">IP Holding · Patent active</div>
-        <div class="venture-next">
-          <div class="venture-next-label">Next milestone</div>
-          Clarify Patent 1 coverage + commercialization path
-        </div>
-      </div>
-
-      <div class="venture-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="venture-name">Fundraising Track</div>
-          <span class="badge badge-purple">Readiness</span>
-        </div>
-        <div class="venture-type">Capital Raise · Readiness gate</div>
-        <div class="venture-next">
-          <div class="venture-next-label">Next milestone</div>
-          Confirm which venture raises + readiness gate
-        </div>
-      </div>
-
-      <div class="venture-card" style="grid-column: span 1;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="venture-name">Agentic OS</div>
-          <span class="badge badge-blue">Build</span>
-        </div>
-        <div class="venture-type">Internal System · Future product</div>
-        <div class="venture-next">
-          <div class="venture-next-label">Next milestone</div>
-          Complete 5-cycle vault buildout
-        </div>
-      </div>
-
     </div>
-  </div>
 
-  <!-- PRODUCT BACKLOG HIGHLIGHTS -->
-  <div class="section">
-    <div class="section-label">Top Product Bets (Construction Finance)</div>
-    <div class="card">
-      <div class="row">
+    <!-- Weekly Review Bar -->
+    <div class="review-bar" id="review-bar">
+      <div class="review-dot"></div>
+      <div class="review-text">
+        <strong>Weekly review</strong> · Next: <span id="next-review">—</span>
+        <div class="detail">Process Quick Capture · check stale Next Actions · audit Waiting On</div>
+      </div>
+      <button class="btn-ghost" onclick="openNotion('https://www.notion.so/366f3c9fe77681fc942ad2542a40e428')">open quick capture</button>
+    </div>
+
+    <!-- Stat Strip -->
+    <div class="stat-strip">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="panel-eyebrow"><span class="dot dot-amber"></span>Active Projects</span>
+          <span class="stat-domain">Passions</span>
+        </div>
+        <div class="stat-value" id="stat-projects">—</div>
+        <div class="stat-detail" id="stat-projects-detail">loading…</div>
+        <div class="stat-cta" onclick="openNotion('https://www.notion.so/366f3c9fe77681cfb9efca8b5300edd0')">+ open Passions →</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="panel-eyebrow"><span class="dot dot-steel"></span>Knowledge</span>
+          <span class="stat-domain">Knowledge</span>
+        </div>
+        <div class="stat-value" id="stat-knowledge">—</div>
+        <div class="stat-detail" id="stat-knowledge-detail">loading…</div>
+        <div class="stat-cta" onclick="openNotion('https://www.notion.so/366f3c9fe77681e0a843f3cea61767e8')">+ add entry →</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="panel-eyebrow"><span class="dot dot-moss"></span>Finance</span>
+          <span class="stat-domain">Finance</span>
+        </div>
+        <div class="stat-value" id="stat-finance">—</div>
+        <div class="stat-detail" id="stat-finance-detail">loading…</div>
+        <div class="stat-cta" onclick="openNotion('https://www.notion.so/366f3c9fe776819bbb13c084bd8e3527')">+ open Finance →</div>
+      </div>
+    </div>
+
+    <!-- Digest + Key Dates -->
+    <div class="two-col">
+      <!-- Chamberlain Digest -->
+      <div class="panel">
+        <div class="panel-eyebrow">Chamberlain · daily digest</div>
+        <div class="panel-title">Good morning.</div>
+        <div class="panel-rule"></div>
+        <div class="digest-grid" id="digest-grid">
+          <div class="digest-quadrant">
+            <div class="digest-qeye">Overnight</div>
+            <div class="digest-qbody"><span class="comment">// </span><span id="dq-overnight">What changed since you last logged in</span></div>
+          </div>
+          <div class="digest-quadrant">
+            <div class="digest-qeye">Today's focus</div>
+            <div class="digest-qbody"><span class="comment">// </span><span id="dq-focus">Top 1–3 things based on Next Actions</span></div>
+          </div>
+          <div class="digest-quadrant">
+            <div class="digest-qeye">Coming up</div>
+            <div class="digest-qbody"><span class="comment">// </span><span id="dq-coming">Events, waiting-on items, deadlines</span></div>
+          </div>
+          <div class="digest-quadrant">
+            <div class="digest-qeye">Stale threads</div>
+            <div class="digest-qbody"><span class="comment">// </span><span id="dq-stale">Knowledge / projects that haven't moved</span></div>
+          </div>
+        </div>
+        <div class="digest-footer">
+          <span class="dot dot-dim" style="flex-shrink:0"></span>
+          Digest cached daily · refreshes at midnight
+          <button class="digest-refresh-btn" onclick="runDigest(true)" style="margin-left:8px">↺ force</button>
+          <span style="margin-left:auto; color:var(--fg-4)" id="digest-last">last run · —</span>
+        </div>
+        <svg class="panel-corner" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M0 0 L24 0 L24 24 M0 0 L0 4 M4 0 L0 0" stroke="var(--acc-faint)" stroke-width="0.5" fill="none"/>
+        </svg>
+      </div>
+
+      <!-- Key Dates -->
+      <div class="panel">
+        <div class="panel-eyebrow">Pinned milestones</div>
+        <div class="panel-title">Key Dates</div>
+        <div class="panel-rule"></div>
+        <div class="key-dates-list" id="key-dates-list">
+          <div class="loading">Calculating countdowns…</div>
+        </div>
+        <svg class="panel-corner" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M0 0 L24 0 L24 24 M0 0 L0 4 M4 0 L0 0" stroke="var(--acc-faint)" stroke-width="0.5" fill="none"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Next Actions -->
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div class="row-label">⭐ Draw Request Automation</div>
-          <div class="row-sub">Lender-ready draw packages auto-generated · few solutions exist</div>
+          <div class="panel-eyebrow">From Notion</div>
+          <div class="panel-title">Next Actions</div>
         </div>
-        <span class="badge badge-green">Near-term</span>
+        <a class="notion-link" href="https://www.notion.so/366f3c9fe77681fc942ad2542a40e428" target="_blank">↗ Quick Capture</a>
       </div>
-      <div class="row">
-        <div>
-          <div class="row-label">⭐ Owner's Contingency Intelligence</div>
-          <div class="row-sub">Predicts contingency exhaustion across portfolio</div>
-        </div>
-        <span class="badge badge-green">Near-term</span>
+      <div class="panel-rule"></div>
+      <div class="next-actions-list" id="next-actions-list">
+        <div class="loading">Fetching actions…</div>
       </div>
-      <div class="row">
+      <svg class="panel-corner" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M0 0 L24 0 L24 24 M0 0 L0 4 M4 0 L0 0" stroke="var(--acc-faint)" stroke-width="0.5" fill="none"/>
+      </svg>
+    </div>
+
+    <!-- Timeline -->
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div class="row-label">⭐ Construction Cash-Flow Forecasting Engine</div>
-          <div class="row-sub">Rolling projections from schedule + contracts + billing</div>
+          <div class="panel-eyebrow" id="timeline-eyebrow">14-day horizon</div>
+          <div class="panel-title">Timeline</div>
         </div>
-        <span class="badge badge-green">Near-term</span>
+        <a class="notion-link" href="https://www.notion.so/366f3c9fe776814ab8a8c411a13f9530" target="_blank">↗ Calendar</a>
       </div>
-      <div class="row">
-        <div>
-          <div class="row-label">BuildOut Platform (overlaps)</div>
-          <div class="row-sub">Owner's Capital Portfolio Dashboard + Owner's Intelligence Briefing</div>
+      <div class="panel-rule"></div>
+      <div class="timeline-strip" id="timeline-strip">
+        <div class="loading">Building timeline…</div>
+      </div>
+      <svg class="panel-corner" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M0 0 L24 0 L24 24 M0 0 L0 4 M4 0 L0 0" stroke="var(--acc-faint)" stroke-width="0.5" fill="none"/>
+      </svg>
+    </div>
+
+    <!-- Quick Links + Currently Wondering -->
+    <div class="two-col">
+      <!-- Quick Links -->
+      <div class="panel">
+        <div class="panel-eyebrow">Workspace</div>
+        <div class="panel-title">Quick Links</div>
+        <div class="panel-rule"></div>
+        <div class="quick-links">
+          <div class="quick-link" onclick="openNotion('https://www.notion.so/366f3c9fe776819bbb13c084bd8e3527')">
+            <span class="quick-link-eye">Finance</span>
+            <span class="quick-link-label">Budget</span>
+          </div>
+          <div class="quick-link" onclick="openNotion('https://www.notion.so/366f3c9fe776814ab8a8c411a13f9530')">
+            <span class="quick-link-eye">Seneschal</span>
+            <span class="quick-link-label">Calendar</span>
+          </div>
+          <div class="quick-link" onclick="openNotion('https://www.notion.so/366f3c9fe77681c9a369c3c990a70887')">
+            <span class="quick-link-eye">Comms</span>
+            <span class="quick-link-label">Email</span>
+          </div>
+          <div class="quick-link" onclick="openNotion('https://www.notion.so/366f3c9fe77681cb8e62f598edcc6c98')">
+            <span class="quick-link-eye">Contacts</span>
+            <span class="quick-link-label">People</span>
+          </div>
+          <div class="quick-link" onclick="openNotion('https://www.notion.so/366f3c9fe77681cfb9efca8b5300edd0')">
+            <span class="quick-link-eye">Projects</span>
+            <span class="quick-link-label">Passions</span>
+          </div>
+          <div class="quick-link" onclick="openNotion('https://www.notion.so/366f3c9fe77681e0a843f3cea61767e8')">
+            <span class="quick-link-eye">Knowledge</span>
+            <span class="quick-link-label">Library</span>
+          </div>
+          <div class="quick-link" onclick="openNotion('https://www.notion.so/366f3c9fe77681fc942ad2542a40e428')">
+            <span class="quick-link-eye">Intake</span>
+            <span class="quick-link-label">Quick Capture</span>
+          </div>
+          <div class="quick-link" onclick="openNotion('https://www.notion.so/366f3c9fe776816a92c7c19c6da769de')">
+            <span class="quick-link-eye">Storage</span>
+            <span class="quick-link-label">Files</span>
+          </div>
         </div>
-        <span class="badge badge-blue">Active</span>
+        <svg class="panel-corner" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M0 0 L24 0 L24 24 M0 0 L0 4 M4 0 L0 0" stroke="var(--acc-faint)" stroke-width="0.5" fill="none"/>
+        </svg>
+      </div>
+
+      <!-- Currently Wondering -->
+      <div class="panel">
+        <div class="panel-eyebrow">From Knowledge</div>
+        <div class="panel-title">Currently Wondering</div>
+        <div class="panel-rule"></div>
+        <div id="knowledge-entry">
+          <div class="loading">Fetching latest entry…</div>
+        </div>
+        <svg class="panel-corner" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M0 0 L24 0 L24 24 M0 0 L0 4 M4 0 L0 0" stroke="var(--acc-faint)" stroke-width="0.5" fill="none"/>
+        </svg>
       </div>
     </div>
-  </div>
 
-  <!-- FACTORY KITCHEN -->
-  <div class="section">
-    <div class="section-label">Factory Kitchen — Shipped</div>
-    <div class="card">
-      <div class="shipped-row">
-        <span class="check">✓</span>
-        <span class="shipped-label">Vault UI system</span>
-        <span class="shipped-date">Jun 25</span>
+    <!-- Quick Capture Panel -->
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="panel-eyebrow">Intake · send to Notion</div>
+          <div class="panel-title">Quick Capture</div>
+        </div>
+        <a class="notion-link" href="https://www.notion.so/366f3c9fe77681fc942ad2542a40e428" target="_blank">↗ open inbox</a>
       </div>
-      <div class="shipped-row">
-        <span class="check">✓</span>
-        <span class="shipped-label">Data layer (ventures / budget / action-queue)</span>
-        <span class="shipped-date">Jun 25</span>
+      <div class="panel-rule"></div>
+      <div class="capture-form">
+        <textarea class="capture-textarea" id="capture-input" placeholder="Thought, task, link, idea — anything. Press ⌘↵ or tap Send." rows="3"></textarea>
+        <div class="capture-actions">
+          <button class="capture-send" id="capture-btn" onclick="submitCapture()">Send to Notion →</button>
+          <span class="capture-status" id="capture-status"></span>
+        </div>
       </div>
-      <div class="shipped-row">
-        <span class="check">✓</span>
-        <span class="shipped-label">Agent contracts + reactive integration</span>
-        <span class="shipped-date">Jun 25</span>
+      <svg class="panel-corner" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M0 0 L24 0 L24 24 M0 0 L0 4 M4 0 L0 0" stroke="var(--acc-faint)" stroke-width="0.5" fill="none"/>
+      </svg>
+    </div>
+
+    <!-- System Map -->
+    <div class="panel">
+      <div class="panel-eyebrow">Docket</div>
+      <div class="panel-title">System Map</div>
+      <div class="panel-rule"></div>
+      <div class="sysmap-grid">
+        <div class="sysmap-agent">
+          <span class="sysmap-num">L1</span>
+          <div>
+            <div class="sysmap-name">Chamberlain</div>
+            <div class="sysmap-role">Gatekeeper, router, daily digest</div>
+            <div class="sysmap-owns">↗ Dashboard</div>
+          </div>
+        </div>
+        <div class="sysmap-agent">
+          <span class="sysmap-num">/1</span>
+          <div>
+            <div class="sysmap-name">Chamberlain</div>
+            <div class="sysmap-role">Layer 1 — primary interface</div>
+            <div class="sysmap-owns">invoke: /LORD1</div>
+          </div>
+        </div>
+        <div class="sysmap-agent">
+          <span class="sysmap-num">/2</span>
+          <div>
+            <div class="sysmap-name">Seneschal</div>
+            <div class="sysmap-role">Events, schedule, recurring routines</div>
+            <div class="sysmap-owns">↗ Calendar · invoke: /LORD2</div>
+          </div>
+        </div>
+        <div class="sysmap-agent">
+          <span class="sysmap-num">/3</span>
+          <div>
+            <div class="sysmap-name">Finance</div>
+            <div class="sysmap-role">Budget, spending, investments</div>
+            <div class="sysmap-owns">↗ Finance · invoke: /LORD3</div>
+          </div>
+        </div>
+        <div class="sysmap-agent">
+          <span class="sysmap-num">/4</span>
+          <div>
+            <div class="sysmap-name">Communications</div>
+            <div class="sysmap-role">Email triage, thread summaries</div>
+            <div class="sysmap-owns">↗ Communications · invoke: /LORD4</div>
+          </div>
+        </div>
+        <div class="sysmap-agent">
+          <span class="sysmap-num">/5</span>
+          <div>
+            <div class="sysmap-name">Contacts</div>
+            <div class="sysmap-role">People, relationships, last contact</div>
+            <div class="sysmap-owns">↗ Contacts · invoke: /LORD5</div>
+          </div>
+        </div>
+        <div class="sysmap-agent">
+          <span class="sysmap-num">/6</span>
+          <div>
+            <div class="sysmap-name">Projects</div>
+            <div class="sysmap-role">Ventures, adventures, initiatives</div>
+            <div class="sysmap-owns">↗ Passions · invoke: /LORD6</div>
+          </div>
+        </div>
+        <div class="sysmap-agent">
+          <span class="sysmap-num">/7</span>
+          <div>
+            <div class="sysmap-name">Knowledge</div>
+            <div class="sysmap-role">Research, curiosity, learning logs</div>
+            <div class="sysmap-owns">↗ Knowledge · invoke: /LORD7</div>
+          </div>
+        </div>
+        <div class="sysmap-agent">
+          <span class="sysmap-num">/8</span>
+          <div>
+            <div class="sysmap-name">Intake</div>
+            <div class="sysmap-role">Drop-zone processor, file classifier</div>
+            <div class="sysmap-owns">↗ Files &amp; Storage · invoke: /LORD8</div>
+          </div>
+        </div>
+        <div class="sysmap-agent">
+          <span class="sysmap-num">/9</span>
+          <div>
+            <div class="sysmap-name">Audit &amp; Controls</div>
+            <div class="sysmap-role">Engineer, controls, approval intelligence</div>
+            <div class="sysmap-owns">Background · invoke: /LORD9</div>
+          </div>
+        </div>
+        <div class="sysmap-agent">
+          <span class="sysmap-num">/10</span>
+          <div>
+            <div class="sysmap-name">Desi</div>
+            <div class="sysmap-role">UI, layout, aesthetics, Notion standards</div>
+            <div class="sysmap-owns">All pages · invoke: /LORD10</div>
+          </div>
+        </div>
+        <div class="sysmap-agent" style="background:var(--lead-0);border-color:var(--lead-1)">
+          <span class="sysmap-num" style="color:var(--fg-4)">/T</span>
+          <div>
+            <div class="sysmap-name" style="color:var(--pap-1)">Twin</div>
+            <div class="sysmap-role" style="color:var(--fg-4)">Claude direct — no lord persona</div>
+            <div class="sysmap-owns">invoke: /Twin</div>
+          </div>
+        </div>
       </div>
-      <div class="shipped-row">
-        <span class="check">✓</span>
-        <span class="shipped-label">Anti-patterns + Integrity checklist</span>
-        <span class="shipped-date">Jun 25</span>
-      </div>
+      <svg class="panel-corner" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M0 0 L24 0 L24 24 M0 0 L0 4 M4 0 L0 0" stroke="var(--acc-faint)" stroke-width="0.5" fill="none"/>
+      </svg>
+    </div>
+
+  </div><!-- /page -->
+</div><!-- /main -->
+
+<!-- Mobile FAB -->
+<button id="fab" onclick="openCaptureModal()" aria-label="Quick Capture">+</button>
+
+<!-- Mobile Quick Capture Modal -->
+<div id="capture-modal">
+  <div id="capture-modal-backdrop" onclick="closeCaptureModal()"></div>
+  <div id="capture-modal-sheet">
+    <div class="modal-title">Quick Capture</div>
+    <button class="modal-close" onclick="closeCaptureModal()">✕</button>
+    <textarea class="capture-textarea" id="capture-modal-input" placeholder="Thought, task, link, idea…" rows="4"></textarea>
+    <div class="capture-actions">
+      <button class="capture-send" id="capture-modal-btn" onclick="submitCaptureModal()">Send to Notion →</button>
+      <span class="capture-status" id="capture-modal-status"></span>
     </div>
   </div>
-
-  <p class="updated">Snapshot: June 27, 2026 · Refresh by running /chamberlain in Cowork</p>
 </div>
 
 <script>
-  const d = new Date();
-  document.getElementById('nav-date').textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+const NOTION = 'mcp__817ffc52-3c7e-4439-9aed-84d62ba06026';
+const GCAL   = 'mcp__6ab08af7-5582-42be-9680-7a6990cb2c96';
+const GMAIL  = 'mcp__539edbe1-0281-40ab-8e0c-996a5c14bc59';
+
+const NOTION_IDS = {
+  dashboard : '366f3c9f-e776-812b-b1dc-f5dd353b202f',
+  capture   : '366f3c9f-e776-81fc-942a-d2542a40e428',
+  finance   : '86022844-d785-43b1-a1eb-69b3d90cec78',
+};
+
+const KEY_DATES = [
+  {
+    label: "Best Man · Matt's Wedding",
+    title: "Matt's Wedding",
+    detail: 'Fort Worth, TX · Best Man duties',
+    date: '2027-02-20',
+    color: 'var(--jewel-r)',
+    url: 'https://www.notion.so/366f3c9fe776812bb1dcf5dd353b202f'
+  },
+  {
+    label: 'Milestone · Bachelor Party',
+    title: 'Bachelor Party',
+    detail: 'Louisville, KY · 18 people to coordinate',
+    date: '2026-11-12',
+    color: 'var(--jewel-a)',
+    url: 'https://www.notion.so/366f3c9fe776812bb1dcf5dd353b202f'
+  },
+];
+
+function openNotion(url) { window.open(url, '_blank'); }
+function navTo(url, activeId) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById(activeId)?.classList.add('active');
+  window.open(url, '_blank');
+  closeSidebar();
+}
+function today() { return new Date(); }
+function fmtDate(d) {
+  const days   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
+}
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const now  = new Date(); now.setHours(0,0,0,0);
+  const then = new Date(dateStr); then.setHours(0,0,0,0);
+  return Math.round((then - now) / 86400000);
+}
+function countdown(days) {
+  if (days === 0)  return 'TODAY';
+  if (days === 1)  return 'tomorrow';
+  if (days < 0)    return Math.abs(days) + 'd ago';
+  if (days < 30)   return days + ' days';
+  const wks = Math.round(days / 7);
+  if (wks < 12)    return wks + ' weeks';
+  const mos = Math.round(days / 30);
+  return mos + ' months';
+}
+function todayKey() { return new Date().toISOString().slice(0,10); }
+
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function openCaptureModal() {
+  document.getElementById('capture-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('capture-modal-input').focus(), 100);
+}
+function closeCaptureModal() {
+  document.getElementById('capture-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+const DAYS_BY_SCOPE = { today: 3, week: 7, month: 30 };
+let currentScope = localStorage.getItem('lifeos.scope') || 'today';
+
+(function initDate() {
+  const now    = today();
+  const DAYS   = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+  const MONTHS = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+  const DAYS_S = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS_S = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function updateHero() {
+    document.getElementById('hero-eyebrow').textContent =
+      DAYS[now.getDay()] + ' · ' + MONTHS[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear()
+      + ' · SCOPE: ' + currentScope.toUpperCase();
+  }
+  updateHero();
+  window._updateHero = updateHero;
+
+  document.getElementById('date-badge').textContent =
+    DAYS_S[now.getDay()] + ' · ' + MONTHS_S[now.getMonth()] + ' ' + now.getDate();
+
+  const dow = now.getDay();
+  const daysToFri = (5 - dow + 7) % 7 || 7;
+  const fri = new Date(now);
+  fri.setDate(now.getDate() + daysToFri);
+  document.getElementById('next-review').textContent =
+    'Friday ' + fri.toLocaleDateString('en-US', {month:'short', day:'numeric'}) + ' 08:00';
+
+  ['today','week','month'].forEach(id => {
+    document.getElementById('scope-'+id).classList.toggle('active', id === currentScope);
+  });
+})();
+
+function setScope(s) {
+  currentScope = s;
+  localStorage.setItem('lifeos.scope', s);
+  ['today','week','month'].forEach(id => {
+    document.getElementById('scope-'+id).classList.toggle('active', id === s);
+  });
+  window._updateHero?.();
+  const days = DAYS_BY_SCOPE[s];
+  document.getElementById('timeline-eyebrow').textContent = days + '-day horizon';
+  buildTimeline(window._calendarEvents || [], days);
+}
+
+function renderKeyDates() {
+  const list = document.getElementById('key-dates-list');
+  list.innerHTML = '';
+  const visible = KEY_DATES.filter(kd => {
+    const d = daysUntil(kd.date);
+    return d !== null && d > -8;
+  });
+  if (visible.length === 0) {
+    list.innerHTML = '<div class="empty-state">No upcoming milestones.</div>';
+    return;
+  }
+  visible.sort((a, b) => new Date(a.date) - new Date(b.date));
+  visible.forEach(kd => {
+    const days = daysUntil(kd.date);
+    const isUrgent = days !== null && days < 14 && days >= 0;
+    const isSoon   = days !== null && days >= 14 && days < 60;
+    const row = document.createElement('div');
+    row.className = 'key-date-row' + (isUrgent ? ' urgent' : isSoon ? ' soon' : '');
+    row.onclick = () => openNotion(kd.url || 'https://www.notion.so/366f3c9fe776812bb1dcf5dd353b202f');
+    const cdColor = days < 14 ? 'var(--jewel-r)' : days < 60 ? 'var(--jewel-a)' : 'var(--fg-3)';
+    row.innerHTML = `
+      <div class="key-date-accent" style="background:${kd.color}"></div>
+      <div style="flex:1;min-width:0">
+        <div class="key-date-label">${kd.label}</div>
+        <div class="key-date-title">${kd.title}</div>
+        <div class="key-date-detail">${kd.detail}</div>
+      </div>
+      <div class="key-date-countdown" style="color:${cdColor}" data-date="${kd.date}">${countdown(days)}</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function refreshCountdowns() {
+  document.querySelectorAll('.key-date-countdown[data-date]').forEach(el => {
+    const days = daysUntil(el.dataset.date);
+    el.textContent = countdown(days);
+    const isUrgent = days !== null && days < 14 && days >= 0;
+    const isSoon   = days !== null && days >= 14 && days < 60;
+    el.style.color = isUrgent ? 'var(--jewel-r)' : isSoon ? 'var(--jewel-a)' : 'var(--fg-3)';
+  });
+}
+setInterval(refreshCountdowns, 60000);
+
+const tooltip = document.getElementById('timeline-tooltip');
+
+function buildTimeline(events, numDays) {
+  numDays = numDays || DAYS_BY_SCOPE[currentScope] || 14;
+  const strip  = document.getElementById('timeline-strip');
+  strip.innerHTML = '';
+  const now  = today();
+  const dows = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const eventMap = {};
+  (events || []).forEach(ev => {
+    const start = ev.start?.date || ev.start?.dateTime || ev.Date || ev.date || '';
+    if (!start) return;
+    const key = start.slice(0,10);
+    if (!eventMap[key]) eventMap[key] = [];
+    eventMap[key].push({ title: ev.summary || ev.title || '·', color: ev.color || 'var(--jewel-b)' });
+  });
+  for (let i = 0; i < numDays; i++) {
+    const d   = new Date(now);
+    d.setDate(now.getDate() + i);
+    const key = d.toISOString().slice(0,10);
+    const isToday = i === 0;
+    const day = document.createElement('div');
+    day.className = 'timeline-day' + (isToday ? ' today' : '');
+    const dow = document.createElement('div');
+    dow.className = 'dow';
+    dow.textContent = dows[d.getDay()];
+    const dom = document.createElement('div');
+    dom.className = 'dom';
+    dom.textContent = d.getDate();
+    day.appendChild(dow);
+    day.appendChild(dom);
+    const dayEvents = eventMap[key] || [];
+    dayEvents.slice(0, 2).forEach(ev => {
+      const dot = document.createElement('div');
+      dot.className = 'event-dot';
+      dot.style.background = ev.color;
+      day.appendChild(dot);
+      const lbl = document.createElement('div');
+      lbl.className = 'ev-label';
+      lbl.textContent = ev.title;
+      day.appendChild(lbl);
+    });
+    if (dayEvents.length > 2) {
+      const more = document.createElement('div');
+      more.className = 'ev-label';
+      more.textContent = '+' + (dayEvents.length - 2) + ' more';
+      day.appendChild(more);
+    }
+    if (dayEvents.length > 0) {
+      day.addEventListener('click', (e) => {
+        tooltip.innerHTML = '<strong>' + fmtDate(d) + '</strong><br>' +
+          dayEvents.map(ev => '&middot; ' + ev.title).join('<br>');
+        tooltip.classList.add('visible');
+        const rect = day.getBoundingClientRect();
+        tooltip.style.left = Math.min(rect.left, window.innerWidth - 260) + 'px';
+        tooltip.style.top  = (rect.bottom + 8) + 'px';
+        e.stopPropagation();
+      });
+    } else {
+      day.addEventListener('click', () => tooltip.classList.remove('visible'));
+    }
+    strip.appendChild(day);
+  }
+  document.addEventListener('click', () => tooltip.classList.remove('visible'), { once: false });
+}
+
+async function runDigest(force) {
+  const cacheKey  = 'lifeos.digest.' + todayKey();
+  const cached    = !force && localStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      const d = JSON.parse(cached);
+      applyDigest(d);
+      const ts = localStorage.getItem(cacheKey + '.ts') || 'earlier today';
+      document.getElementById('digest-last').textContent = 'last run · ' + ts;
+      return;
+    } catch(e) {}
+  }
+  ['overnight','focus','coming','stale'].forEach(k => {
+    document.getElementById('dq-' + k).textContent = '…';
+  });
+  if (!window.cowork?.askClaude) return;
+  const calCtx = (window._calendarEvents || [])
+    .slice(0, 5)
+    .map(ev => (ev.summary || ev.title || '') + ' · ' + (ev.start?.date || ev.start?.dateTime || '').slice(0,10))
+    .join('; ');
+  try {
+    const now = today();
+    const digestText = await window.cowork.askClaude(
+      `You are the Chamberlain agent for Dan McCauley's Life OS. Today is ${now.toDateString()}, ${now.toLocaleTimeString()}.
+Dan's key dates: Bachelor Party Nov 12-15 2026 (Louisville KY, 18 people), Matt's Wedding Feb 20 2027 Fort Worth TX (Dan is Best Man).
+${calCtx ? 'Upcoming calendar events: ' + calCtx : ''}
+Generate a sharp, actionable daily digest in exactly 4 parts (1-2 sentences each). Be specific. No fluff.
+Format as JSON only, no markdown:
+{"overnight":"what changed / any new items since yesterday","focus":"top 1-3 priorities for today","coming":"next events or deadlines in the next 7 days","stale":"areas not touched in 3+ days that need attention"}`,
+      []
+    );
+    const clean = digestText.replace(/\`\`\`json\n?|\n?\`\`\`/g, '').trim();
+    const d = JSON.parse(clean);
+    applyDigest(d);
+    const ts = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    localStorage.setItem(cacheKey, JSON.stringify(d));
+    localStorage.setItem(cacheKey + '.ts', ts);
+    document.getElementById('digest-last').textContent = 'last run · ' + ts;
+  } catch(e) {
+    ['overnight','focus','coming','stale'].forEach(k => {
+      if (document.getElementById('dq-' + k).textContent === '…') {
+        document.getElementById('dq-' + k).textContent = '—';
+      }
+    });
+  }
+}
+
+function applyDigest(d) {
+  if (d.overnight) document.getElementById('dq-overnight').textContent = d.overnight;
+  if (d.focus)     document.getElementById('dq-focus').textContent     = d.focus;
+  if (d.coming)    document.getElementById('dq-coming').textContent    = d.coming;
+  if (d.stale)     document.getElementById('dq-stale').textContent     = d.stale;
+}
+
+async function submitCapture(inputId, btnId, statusId) {
+  inputId  = inputId  || 'capture-input';
+  btnId    = btnId    || 'capture-btn';
+  statusId = statusId || 'capture-status';
+  const input  = document.getElementById(inputId);
+  const btn    = document.getElementById(btnId);
+  const status = document.getElementById(statusId);
+  const text   = input.value.trim();
+  if (!text) return;
+  btn.disabled = true;
+  status.textContent = 'Sending…';
+  status.className   = 'capture-status';
+
+  if (window.cowork?.callMcpTool) {
+    try {
+      await window.cowork.callMcpTool(
+        NOTION + '__notion-create-pages',
+        {
+          parent: { type: 'page_id', page_id: NOTION_IDS.capture },
+          properties: {
+            title: [{ text: { content: text.slice(0, 100) } }]
+          },
+          children: text.length > 100 ? [{
+            type: 'paragraph',
+            paragraph: { rich_text: [{ text: { content: text } }] }
+          }] : []
+        }
+      );
+      status.textContent = '✓ Captured to Notion';
+      status.className   = 'capture-status success';
+      input.value        = '';
+      setTimeout(() => { status.textContent = ''; }, 3000);
+      btn.disabled = false;
+      return;
+    } catch(e) {}
+  }
+
+  // Fallback: copy to clipboard and open Notion
+  try {
+    await navigator.clipboard.writeText(text);
+    status.textContent = 'Copied to clipboard — opening Notion';
+    status.className   = 'capture-status';
+  } catch(e) {
+    status.textContent = 'Opening Notion (paste manually)';
+    status.className   = 'capture-status';
+  }
+  openNotion('https://www.notion.so/366f3c9fe77681fc942ad2542a40e428');
+  setTimeout(() => { status.textContent = ''; }, 4000);
+  btn.disabled = false;
+}
+
+function submitCaptureModal() {
+  submitCapture('capture-modal-input', 'capture-modal-btn', 'capture-modal-status');
+  setTimeout(closeCaptureModal, 1500);
+}
+
+const SHORTCUTS = {
+  'd': 'https://www.notion.so/366f3c9fe776812bb1dcf5dd353b202f',
+  'c': 'https://www.notion.so/366f3c9fe77681fc942ad2542a40e428',
+  'k': 'https://www.notion.so/366f3c9fe776814ab8a8c411a13f9530',
+  'f': 'https://www.notion.so/366f3c9fe776819bbb13c084bd8e3527',
+  'm': 'https://www.notion.so/366f3c9fe77681c9a369c3c990a70887',
+  'n': 'https://www.notion.so/366f3c9fe77681cb8e62f598edcc6c98',
+  'p': 'https://www.notion.so/366f3c9fe77681cfb9efca8b5300edd0',
+  'l': 'https://www.notion.so/366f3c9fe77681e0a843f3cea61767e8',
+  's': 'https://www.notion.so/366f3c9fe776816a92c7c19c6da769de',
+};
+
+document.addEventListener('keydown', (e) => {
+  if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    document.getElementById('capture-input')?.focus();
+    return;
+  }
+  const url = SHORTCUTS[e.key.toLowerCase()];
+  if (url && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    e.preventDefault();
+    openNotion(url);
+  }
+});
+
+document.getElementById('capture-input')?.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    submitCapture();
+  }
+});
+document.getElementById('capture-modal-input')?.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    submitCaptureModal();
+  }
+});
+
+function parseResult(r) {
+  if (!r) return {};
+  if (r.results !== undefined || r.items !== undefined || r.properties !== undefined) return r;
+  if (r.structuredContent) return r.structuredContent;
+  try { return JSON.parse(r?.content?.[0]?.text ?? '{}'); } catch(e) { return {}; }
+}
+
+async function loadData() {
+  renderKeyDates();
+  buildTimeline([], DAYS_BY_SCOPE[currentScope]);
+
+  if (!window.cowork?.callMcpTool) {
+    // Not in Cowork — show static placeholders
+    document.getElementById('stat-projects').textContent = '—';
+    document.getElementById('stat-projects-detail').textContent = 'Live in Cowork only';
+    document.getElementById('stat-knowledge').textContent = '—';
+    document.getElementById('stat-knowledge-detail').textContent = 'Live in Cowork only';
+    document.getElementById('stat-finance').textContent = '—';
+    document.getElementById('stat-finance-detail').textContent = 'Live in Cowork only';
+    document.getElementById('next-actions-list').innerHTML = '<div class="empty-state">Open in Cowork for live data.<span class="cta" onclick="openNotion(\'https://www.notion.so/366f3c9fe77681fc942ad2542a40e428\')">Open Quick Capture in Notion →</span></div>';
+    document.getElementById('knowledge-entry').innerHTML = '<div class="empty-state">Open in Cowork for live data.</div>';
+    return;
+  }
+
+  // Calendar
+  try {
+    const now   = today();
+    const tMin  = now.toISOString();
+    const tMax  = new Date(now.getTime() + 30 * 86400000).toISOString();
+    const calResult = await window.cowork.callMcpTool(
+      GCAL + '__list_events',
+      { calendarId: 'primary', timeMin: tMin, timeMax: tMax, maxResults: 50, singleEvents: true, orderBy: 'startTime' }
+    );
+    const raw    = parseResult(calResult);
+    const events = raw?.items || raw?.events || raw?.results || [];
+    window._calendarEvents = events;
+    buildTimeline(events, DAYS_BY_SCOPE[currentScope]);
+  } catch(e) {
+    window._calendarEvents = [];
+  }
+
+  // Projects stat
+  try {
+    const projResult = await window.cowork.callMcpTool(
+      NOTION + '__notion-search',
+      { query: 'active project', filters: {}, page_size: 25, max_highlight_length: 0 }
+    );
+    const raw    = parseResult(projResult);
+    const pages  = (raw?.results || []).filter(r => r.object === 'page' || r.type === 'page');
+    document.getElementById('stat-projects').textContent = pages.length || '0';
+    document.getElementById('stat-projects-detail').textContent =
+      pages.length > 0 ? pages.length + ' active' : 'No active projects yet';
+  } catch(e) {
+    document.getElementById('stat-projects').textContent = '—';
+    document.getElementById('stat-projects-detail').textContent = 'Notion not connected';
+  }
+
+  // Knowledge stat + Currently Wondering
+  try {
+    const kwResult = await window.cowork.callMcpTool(
+      NOTION + '__notion-search',
+      { query: '', filters: { object: 'page' }, page_size: 50, max_highlight_length: 0 }
+    );
+    const raw     = parseResult(kwResult);
+    const entries = (raw?.results || []).filter(r => r.object === 'page' || r.type === 'page');
+    document.getElementById('stat-knowledge').textContent = entries.length || '0';
+    document.getElementById('stat-knowledge-detail').textContent = entries.length + ' pages in workspace';
+
+    const sorted = entries.sort((a, b) => {
+      const ta = a.last_edited_time || a.created_time || '';
+      const tb = b.last_edited_time || b.created_time || '';
+      return tb.localeCompare(ta);
+    });
+    const latest = sorted[0];
+    const kwEl = document.getElementById('knowledge-entry');
+    if (latest) {
+      const title   = latest.title || latest.properties?.title?.title?.[0]?.plain_text || 'Untitled';
+      const hl      = latest.highlight || '';
+      const edited  = latest.last_edited_time ? new Date(latest.last_edited_time).toLocaleDateString('en-US', {month:'short',day:'numeric'}) : '';
+      kwEl.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div class="panel-eyebrow" style="margin-bottom:4px">Last edited ${edited}</div>
+            <div style="font-size:14px;font-weight:600;color:var(--fg-0);font-family:var(--f-serif)">${title}</div>
+          </div>
+          ${hl ? `<div style="font-family:var(--f-mono);font-size:11px;color:var(--fg-3);line-height:1.5;padding:10px 12px;background:var(--pap-2);border:1px solid var(--lead-2);border-radius:5px">${hl}</div>` : ''}
+          <a class="notion-link" href="${latest.url || 'https://www.notion.so/366f3c9fe77681e0a843f3cea61767e8'}" target="_blank">&#8599; open in Notion</a>
+        </div>
+      `;
+    } else {
+      kwEl.innerHTML = '<div class="empty-state">No pages found.<span class="cta" onclick="openNotion(\'https://www.notion.so/366f3c9fe77681e0a843f3cea61767e8\')">+ Add first entry</span></div>';
+    }
+  } catch(e) {
+    document.getElementById('stat-knowledge').textContent = '—';
+    document.getElementById('knowledge-entry').innerHTML = '<div class="empty-state">Could not load knowledge entries.</div>';
+  }
+
+  // Finance stat
+  try {
+    const finResult = await window.cowork.callMcpTool(
+      NOTION + '__notion-fetch',
+      { id: NOTION_IDS.finance }
+    );
+    const raw  = parseResult(finResult);
+    const text = JSON.stringify(raw);
+    const match = text.match(/\$[\d,]+(?:\.\d{2})?/);
+    if (match) {
+      document.getElementById('stat-finance').textContent = match[0];
+      document.getElementById('stat-finance-detail').textContent = 'Budget page connected';
+    } else {
+      document.getElementById('stat-finance').textContent = '✓';
+      document.getElementById('stat-finance-detail').textContent = 'Finance page connected · add budget entries';
+    }
+  } catch(e) {
+    document.getElementById('stat-finance').textContent = '—';
+    document.getElementById('stat-finance-detail').textContent = 'Connect Finance in Notion';
+  }
+
+  // Next Actions
+  try {
+    const actResult = await window.cowork.callMcpTool(
+      NOTION + '__notion-search',
+      { query: 'next action', filters: {}, page_size: 10, max_highlight_length: 60 }
+    );
+    const raw     = parseResult(actResult);
+    const actions = (raw?.results || []).filter(r => r.object === 'page' || r.type === 'page').slice(0, 6);
+    const list    = document.getElementById('next-actions-list');
+    if (actions.length > 0) {
+      list.innerHTML = '';
+      actions.forEach(a => {
+        const title   = a.title || a.properties?.title?.title?.[0]?.plain_text || 'Untitled';
+        const url     = a.url || 'https://www.notion.so/366f3c9fe77681fc942ad2542a40e428';
+        const tag     = a.parent?.database_id ? 'DB' : 'Page';
+        const row     = document.createElement('div');
+        row.className = 'action-row';
+        row.onclick   = () => openNotion(url);
+        row.innerHTML = `
+          <div class="action-check"></div>
+          <span class="action-title">${title}</span>
+          <span class="action-tag">${tag}</span>
+        `;
+        list.appendChild(row);
+      });
+      const viewAll = document.createElement('div');
+      viewAll.style.cssText = 'text-align:right;margin-top:6px';
+      viewAll.innerHTML = '<span class="notion-link" style="cursor:pointer" onclick="openNotion(\'https://www.notion.so/366f3c9fe77681fc942ad2542a40e428\')">view all in Notion &#8599;</span>';
+      list.appendChild(viewAll);
+    } else {
+      list.innerHTML = '<div class="empty-state">No "next action" items found.<span class="cta" onclick="openNotion(\'https://www.notion.so/366f3c9fe77681fc942ad2542a40e428\')">+ Add in Quick Capture</span></div>';
+    }
+  } catch(e) {
+    document.getElementById('next-actions-list').innerHTML = '<div class="empty-state">Could not load next actions.</div>';
+  }
+
+  await runDigest(false);
+}
+
+loadData();
 </script>
 </body>
 </html>

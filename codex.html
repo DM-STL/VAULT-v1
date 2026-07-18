@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Vault Codex",
+  "schemaVersion": 1,
+  "description": "Dan's daily life hub — jewel-glass dark theme. Live calendar, open projects & actions, Pomodoro timer, quick notes, habit tracker, and countdown dates. Pulls today's events and 7-day schedule from Google Calendar.",
+  "mcpTools": [
+    "mcp__6ab08af7-5582-42be-9680-7a6990cb2c96__list_events",
+    "mcp__6ab08af7-5582-42be-9680-7a6990cb2c96__list_calendars",
+    "mcp__539edbe1-0281-40ab-8e0c-996a5c14bc59__search_threads"
+  ],
+  "mcpServerNames": [
+    "Google Calendar",
+    "Google Calendar",
+    "Gmail"
+  ]
+}
+</script>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Codex — Daily Hub</title><style>
+/* ═══ CODEX — DAILY HUB ═══
+   Jewel-glass aesthetic · dark base · teal/violet accents */
+:root {
+  color-scheme: light;
+  --bg:        #0d0c14;
+  --surface:   #13111f;
+  --surface2:  #1a1728;
+  --surface3:  #221f33;
+  --border:    rgba(255,255,255,0.08);
+  --border2:   rgba(255,255,255,0.13);
+  --ink:       #e8e5f8;
+  --ink2:      #a09cc0;
+  --ink3:      #6a6590;
+
+  --v1: #7c5cfc; --v2: #b47cfc;
+  --t1: #5ce8d4; --t2: #5ce8a0;
+  --r1: #fc5c8c; --r2: #fc7c7c;
+  --a1: #fcb97c; --a2: #fc7c7c;
+  --ok: #5ce8a0;
+  --warn: #fcb97c;
+  --danger: #fc5c5c;
+
+  --nav-w: 200px;
+  --topbar-h: 54px;
+  --radius: 12px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+html,body { height:100%; overflow:hidden; }
+
+body {
+  font-family: -apple-system,'Segoe UI',system-ui,sans-serif;
+  font-size:13px;
+  background:var(--bg);
+  color:var(--ink);
+  display:flex;
+  flex-direction:column;
+}
+
+/* ── Atmosphere ── */
+.atm {
+  position:fixed; border-radius:50%; pointer-events:none; z-index:0;
+  filter:blur(100px); opacity:.18;
+}
+.atm-1 { width:500px;height:500px;top:-150px;left:-100px;background:radial-gradient(circle,var(--v1),transparent 70%); }
+.atm-2 { width:400px;height:400px;bottom:-80px;right:0;background:radial-gradient(circle,var(--t1),transparent 70%); }
+.atm-3 { width:300px;height:300px;top:40%;left:45%;background:radial-gradient(circle,var(--r1),transparent 70%);opacity:.08; }
+
+/* ── Topbar ── */
+#topbar {
+  position:relative; z-index:20;
+  height:var(--topbar-h);
+  display:flex; align-items:center; gap:14px;
+  padding:0 20px 0 22px;
+  background:linear-gradient(135deg,rgba(124,92,252,.16),rgba(92,232,212,.07));
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(24px);
+  flex-shrink:0;
+  padding-top:max(0px, var(--safe-top));
+}
+.brand {
+  display:flex; align-items:center; gap:10px;
+}
+.brand-icon {
+  width:30px;height:30px;border-radius:9px;
+  background:linear-gradient(135deg,var(--v1),var(--t1));
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;
+  box-shadow:0 2px 10px rgba(124,92,252,.4);
+}
+.brand-title {
+  font-size:.95rem;font-weight:700;letter-spacing:-.01em;
+  background:linear-gradient(90deg,var(--v2),var(--t1));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.brand-sub { font-size:.68rem;color:var(--ink3); }
+.spacer { flex:1; }
+#clock {
+  font-size:1.1rem;font-weight:700;
+  background:linear-gradient(90deg,var(--t1),var(--t2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.02em;
+}
+#date-display { font-size:.72rem;color:var(--ink3);text-align:right; }
+
+/* ── Layout ── */
+#layout {
+  display:flex; flex:1; min-height:0; position:relative; z-index:1;
+}
+
+/* ── Sidebar ── */
+#sidebar {
+  width:var(--nav-w);
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  flex-shrink:0; overflow:hidden;
+}
+.nav-section-label {
+  font-size:.6rem;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink3);
+  padding:14px 14px 4px;
+}
+.nav-item {
+  display:flex;align-items:center;gap:9px;
+  padding:9px 14px;
+  border:none;background:none;
+  width:100%;text-align:left;cursor:pointer;
+  color:var(--ink2);font-size:.83rem;
+  border-radius:0;transition:all .15s;
+  border-left:2px solid transparent;
+}
+.nav-item .nav-icon { font-size:15px;width:20px;text-align:center;flex-shrink:0; }
+.nav-item:hover { background:var(--surface2);color:var(--ink); }
+.nav-item.active {
+  background:linear-gradient(90deg,rgba(124,92,252,.18),rgba(92,232,212,.06));
+  color:var(--t1);
+  border-left-color:var(--v1);
+}
+.nav-item .nav-badge {
+  margin-left:auto;
+  font-size:.62rem;font-weight:700;
+  background:rgba(124,92,252,.25);color:var(--v2);
+  border-radius:999px;padding:1px 6px;
+}
+.nav-footer {
+  margin-top:auto;padding:12px 14px;
+  border-top:1px solid var(--border);
+  font-size:.68rem;color:var(--ink3);
+  line-height:1.5;
+}
+
+/* ── Main ── */
+#main {
+  flex:1; overflow-y:auto; min-height:0;
+  padding:20px;
+}
+
+/* ── Panels ── */
+.panel { display:none; }
+.panel.active { display:block; }
+
+/* ── Section header ── */
+.section-header {
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;
+}
+.section-header h2 {
+  font-size:1rem;font-weight:700;letter-spacing:-.01em;
+  background:linear-gradient(135deg,var(--ink),var(--ink2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.section-tag {
+  font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 8px;border-radius:999px;
+  background:rgba(124,92,252,.15);color:var(--v2);border:1px solid rgba(124,92,252,.25);
+}
+
+/* ── Cards ── */
+.card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:12px;
+}
+.card-h {
+  font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:10px;padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:6px;
+}
+.card-h .ch-dot {
+  width:7px;height:7px;border-radius:50%;flex-shrink:0;
+}
+
+/* ── Grid layouts ── */
+.g2 { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+.g3 { display:grid;grid-template-columns:repeat(3,1fr);gap:12px; }
+@media(max-width:700px) { .g2,.g3 { grid-template-columns:1fr; } }
+
+/* ── Stats ── */
+.stat-row { display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px; }
+@media(max-width:600px) { .stat-row { grid-template-columns:repeat(2,1fr); } }
+.stat-box {
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;
+}
+.stat-n {
+  font-size:1.5rem;font-weight:800;line-height:1;
+  background:linear-gradient(135deg,var(--v1),var(--t1));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.stat-l { font-size:.7rem;color:var(--ink3);margin-top:3px; }
+
+/* ── Row items ── */
+.row-item {
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:8px;padding:8px 0;
+  border-bottom:1px solid var(--border);
+  font-size:.84rem;
+}
+.row-item:last-child { border-bottom:none; }
+.row-label { color:var(--ink2); }
+.row-sub { font-size:.71rem;color:var(--ink3);margin-top:2px; }
+
+/* ── Pills ── */
+.pill {
+  font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:999px;
+  white-space:nowrap;flex-shrink:0;
+}
+.p-ok { background:rgba(92,232,160,.15);color:var(--ok);border:1px solid rgba(92,232,160,.3); }
+.p-warn { background:rgba(252,185,124,.15);color:var(--warn);border:1px solid rgba(252,185,124,.3); }
+.p-danger { background:rgba(252,92,92,.15);color:var(--danger);border:1px solid rgba(252,92,92,.3); }
+.p-muted { background:rgba(160,156,192,.12);color:var(--ink3);border:1px solid var(--border); }
+.p-accent { background:rgba(124,92,252,.15);color:var(--v2);border:1px solid rgba(124,92,252,.3); }
+
+/* ── Event items ── */
+.event-item {
+  display:flex;gap:12px;align-items:flex-start;
+  padding:9px 0;border-bottom:1px solid var(--border);
+}
+.event-item:last-child { border-bottom:none; }
+.event-time {
+  font-size:.72rem;font-weight:700;color:var(--t1);
+  width:52px;flex-shrink:0;text-align:right;
+  font-variant-numeric:tabular-nums;
+  padding-top:1px;
+}
+.event-dot {
+  width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;
+}
+.event-title { font-size:.85rem;color:var(--ink);font-weight:500; }
+.event-cal { font-size:.7rem;color:var(--ink3);margin-top:1px; }
+
+/* ── Project cards ── */
+.venture-card {
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:13px;
+  border-left:3px solid;
+}
+.vc-name { font-size:.88rem;font-weight:700;margin-bottom:3px; }
+.vc-stage { font-size:.7rem;color:var(--ink3);margin-bottom:8px; }
+.vc-row { display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--ink2); }
+
+/* ── Tools ── */
+.tool-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px; }
+
+/* Pomodoro */
+.pomo-ring {
+  width:110px;height:110px;border-radius:50%;
+  background:conic-gradient(var(--t1) var(--pomo-pct,0%), var(--surface3) 0);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 12px;
+  position:relative;
+  box-shadow:0 0 0 3px var(--surface2), 0 0 0 4px var(--border2);
+  transition:background .1s;
+}
+.pomo-inner {
+  width:80px;height:80px;border-radius:50%;
+  background:var(--surface);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.pomo-time {
+  font-size:1.3rem;font-weight:800;font-variant-numeric:tabular-nums;
+  background:linear-gradient(135deg,var(--t1),var(--t2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  letter-spacing:.04em;
+}
+.pomo-label { font-size:.6rem;color:var(--ink3);margin-top:1px; }
+.pomo-controls { display:flex;gap:8px;justify-content:center; }
+.pomo-presets { display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap; }
+.preset-btn {
+  font-size:.65rem;padding:3px 9px;border-radius:999px;
+  border:1px solid var(--border2);background:var(--surface2);
+  color:var(--ink2);cursor:pointer;transition:all .15s;
+}
+.preset-btn:hover { border-color:var(--t1);color:var(--t1); }
+.preset-btn.active { background:rgba(92,232,212,.18);border-color:var(--t1);color:var(--t1); }
+.pomo-sessions { font-size:.68rem;color:var(--ink3);text-align:center;margin-top:8px; }
+
+/* Notes */
+.notes-area {
+  width:100%;min-height:120px;resize:vertical;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:8px;padding:10px;
+  color:var(--ink);font-family:inherit;font-size:.84rem;
+  line-height:1.55;outline:none;
+  transition:border-color .15s;
+}
+.notes-area:focus { border-color:var(--v1); }
+.notes-bar {
+  display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;
+}
+.notes-saved { font-size:.7rem;color:var(--ok);opacity:0;transition:opacity .3s; }
+.notes-saved.show { opacity:1; }
+
+/* Habit tracker */
+.habit-row {
+  display:flex;align-items:center;gap:10px;padding:7px 0;
+  border-bottom:1px solid var(--border);
+}
+.habit-row:last-child { border-bottom:none; }
+.habit-name { flex:1;font-size:.83rem;color:var(--ink2); }
+.habit-dots { display:flex;gap:5px; }
+.habit-dot {
+  width:18px;height:18px;border-radius:50%;
+  border:1.5px solid var(--border2);
+  background:var(--surface2);cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:transparent;
+}
+.habit-dot.done {
+  background:rgba(92,232,160,.25);border-color:var(--ok);
+  color:var(--ok);font-size:10px;
+}
+.habit-day-labels { display:flex;gap:5px;padding-left:calc(100% - 140px);margin-bottom:4px; }
+.habit-day-label { width:18px;text-align:center;font-size:.6rem;color:var(--ink3); }
+
+/* Countdown */
+.countdown-item {
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--border);
+}
+.countdown-item:last-child { border-bottom:none; }
+.ci-label { font-size:.84rem;color:var(--ink2); }
+.ci-date { font-size:.72rem;color:var(--ink3);margin-top:2px; }
+.ci-days {
+  font-size:1.2rem;font-weight:800;
+  background:linear-gradient(135deg,var(--v1),var(--t1));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.ci-unit { font-size:.62rem;color:var(--ink3);text-align:right; }
+
+/* Buttons */
+.btn {
+  display:inline-flex;align-items:center;gap:6px;
+  border:1px solid var(--border2);background:var(--surface2);
+  color:var(--ink2);padding:6px 14px;border-radius:999px;
+  font:inherit;font-size:.75rem;font-weight:600;cursor:pointer;
+  transition:all .15s;
+}
+.btn:hover { border-color:var(--v1);color:var(--v2); }
+.btn.primary {
+  background:linear-gradient(135deg,rgba(124,92,252,.3),rgba(92,232,212,.2));
+  border-color:rgba(124,92,252,.5);color:var(--t1);
+}
+.btn.danger { border-color:rgba(252,92,92,.4);color:var(--danger); }
+.btn.sm { padding:4px 10px;font-size:.68rem; }
+
+/* Loading states */
+.loading-pulse {
+  display:inline-block;
+  background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%);
+  background-size:200% 100%;
+  animation:pulse 1.4s ease infinite;
+  border-radius:4px;height:12px;
+}
+@keyframes pulse { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* Scrollbar */
+#main::-webkit-scrollbar { width:5px; }
+#main::-webkit-scrollbar-track { background:transparent; }
+#main::-webkit-scrollbar-thumb { background:var(--surface3);border-radius:3px; }
+</style>
+</head>
+<body>
+
+<div class="atm atm-1"></div>
+<div class="atm atm-2"></div>
+<div class="atm atm-3"></div>
+
+<!-- Topbar -->
+<div id="topbar">
+  <div class="brand">
+    <div class="brand-icon">⬡</div>
+    <div>
+      <div class="brand-title">Codex</div>
+      <div class="brand-sub">Daily Hub · Dan McCauley</div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div style="text-align:right">
+    <div id="clock">--:--:--</div>
+    <div id="date-display">Loading…</div>
+  </div>
+</div>
+
+<!-- Layout -->
+<div id="layout">
+
+  <!-- Sidebar nav -->
+  <div id="sidebar">
+    <div class="nav-section-label">Daily</div>
+    <button class="nav-item active" data-panel="today" onclick="switchPanel('today',this)">
+      <span class="nav-icon">🌅</span>Today
+    </button>
+    <button class="nav-item" data-panel="schedule" onclick="switchPanel('schedule',this)">
+      <span class="nav-icon">📅</span>Schedule
+    </button>
+
+    <div class="nav-section-label">Work</div>
+    <button class="nav-item" data-panel="projects" onclick="switchPanel('projects',this)">
+      <span class="nav-icon">🚀</span>Projects
+      <span class="nav-badge">5</span>
+    </button>
+    <button class="nav-item" data-panel="actions" onclick="switchPanel('actions',this)">
+      <span class="nav-icon">⚡</span>Actions
+      <span class="nav-badge" id="action-badge">5</span>
+    </button>
+
+    <div class="nav-section-label">Tools</div>
+    <button class="nav-item" data-panel="focus" onclick="switchPanel('focus',this)">
+      <span class="nav-icon">🍅</span>Focus
+    </button>
+    <button class="nav-item" data-panel="notes" onclick="switchPanel('notes',this)">
+      <span class="nav-icon">📝</span>Notes
+    </button>
+    <button class="nav-item" data-panel="habits" onclick="switchPanel('habits',this)">
+      <span class="nav-icon">✅</span>Habits
+    </button>
+    <button class="nav-item" data-panel="countdown" onclick="switchPanel('countdown',this)">
+      <span class="nav-icon">⏳</span>Countdown
+    </button>
+
+    <div class="nav-footer">
+      Hierarchy v14 · OP_CONTROLS<br>
+      Vault: C:\Obsidian Vault\
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+
+    <!-- ── TODAY ── -->
+    <div class="panel active" id="panel-today">
+      <div class="section-header">
+        <h2 id="greeting">Good morning, Dan</h2>
+        <span class="section-tag" id="day-tag">Saturday</span>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="stat-n" id="stat-events">—</div>
+          <div class="stat-l">events today</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-n">5</div>
+          <div class="stat-l">open actions</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-n">4</div>
+          <div class="stat-l">open decisions</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-n" id="stat-pomo">0</div>
+          <div class="stat-l">focus sessions</div>
+        </div>
+      </div>
+
+      <!-- Today's calendar events -->
+      <div class="card">
+        <div class="card-h">
+          <div class="ch-dot" style="background:var(--t1)"></div>
+          Today's Calendar
+          <div class="spacer"></div>
+          <button class="btn sm" onclick="loadTodayEvents()">↻ Refresh</button>
+        </div>
+        <div id="today-events">
+          <div style="color:var(--ink3);font-size:.82rem;padding:10px 0">Loading calendar…</div>
+        </div>
+      </div>
+
+      <!-- Priority focus -->
+      <div class="card">
+        <div class="card-h">
+          <div class="ch-dot" style="background:var(--v1)"></div>
+          Top Priority Today
+        </div>
+        <div class="row-item">
+          <div><div class="row-label">Resolve D-002 ISA cert path — TreeService blocker</div><div class="row-sub">Decision needed before any St. Louis city work can proceed</div></div>
+          <span class="pill p-danger">urgent</span>
+        </div>
+        <div class="row-item">
+          <div><div class="row-label">Confirm Fundraising venture scope</div><div class="row-sub">D-004 — which venture does the fundraising track serve?</div></div>
+          <span class="pill p-warn">open</span>
+        </div>
+        <div class="row-item">
+          <div><div class="row-label">Populate budget figures</div><div class="row-sub">Finance agent waiting on Dan's inputs</div></div>
+          <span class="pill p-warn">Dan</span>
+        </div>
+      </div>
+
+      <!-- Quick status -->
+      <div class="g2">
+        <div class="card">
+          <div class="card-h">
+            <div class="ch-dot" style="background:var(--t2)"></div>
+            Factory
+          </div>
+          <div class="row-item"><span class="row-label">MANAGEMENT · GM</span><span class="pill p-ok">live</span></div>
+          <div class="row-item"><span class="row-label">KITCHEN · Head Chef + QC</span><span class="pill p-ok">live</span></div>
+          <div class="row-item"><span class="row-label">FLOOR · 5 tables</span><span class="pill p-ok">live</span></div>
+        </div>
+        <div class="card">
+          <div class="card-h">
+            <div class="ch-dot" style="background:var(--a1)"></div>
+            Blockers
+          </div>
+          <div class="row-item"><span class="row-label">D-002 ISA cert path</span><span class="pill p-danger">blocker</span></div>
+          <div class="row-item"><span class="row-label">Budget figures missing</span><span class="pill p-warn">input needed</span></div>
+          <div class="row-item"><span class="row-label">0/18 scheduled tasks</span><span class="pill p-warn">not activated</span></div>
+        </div>
+      </div>
+    </div><!-- /today -->
+
+    <!-- ── SCHEDULE ── -->
+    <div class="panel" id="panel-schedule">
+      <div class="section-header">
+        <h2>Schedule</h2>
+        <span class="section-tag">Next 7 Days</span>
+        <div class="spacer"></div>
+        <button class="btn sm" onclick="loadSchedule()">↻ Refresh</button>
+      </div>
+      <div class="card">
+        <div id="schedule-content">
+          <div style="color:var(--ink3);font-size:.82rem;padding:10px 0">Loading schedule…</div>
+        </div>
+      </div>
+    </div><!-- /schedule -->
+
+    <!-- ── PROJECTS ── -->
+    <div class="panel" id="panel-projects">
+      <div class="section-header">
+        <h2>Projects</h2>
+        <span class="section-tag">5 Active</span>
+      </div>
+
+      <div class="g2">
+        <div class="venture-card" style="border-left-color:var(--warn)">
+          <div class="vc-name">🌳 TreeService</div>
+          <div class="vc-stage">Exploration · St. Louis residential &amp; commercial</div>
+          <div class="vc-row">
+            <span>ISA cert, target segment, scope</span>
+            <span class="pill p-danger">4 open decisions</span>
+          </div>
+        </div>
+        <div class="venture-card" style="border-left-color:var(--warn)">
+          <div class="vc-name">🏗️ BuildOut Platform</div>
+          <div class="vc-stage">Validation · Construction project management (M-001)</div>
+          <div class="vc-row">
+            <span>Personal venture, explore first</span>
+            <span class="pill p-warn">validation</span>
+          </div>
+        </div>
+        <div class="venture-card" style="border-left-color:var(--ok)">
+          <div class="vc-name">⚖️ Hoen Ventures, LLC</div>
+          <div class="vc-stage">Operating · IP holding entity</div>
+          <div class="vc-row">
+            <span>Supports venture structures, Patent 1</span>
+            <span class="pill p-ok">active</span>
+          </div>
+        </div>
+        <div class="venture-card" style="border-left-color:var(--warn)">
+          <div class="vc-name">💰 Fundraising</div>
+          <div class="vc-stage">Readiness · D-004 open — which venture?</div>
+          <div class="vc-row">
+            <span>Blocked on venture confirmation</span>
+            <span class="pill p-warn">readiness</span>
+          </div>
+        </div>
+        <div class="venture-card" style="border-left-color:var(--ok)">
+          <div class="vc-name">⬡ Agentic OS</div>
+          <div class="vc-stage">Build · Hierarchy v14 — M-002 committed</div>
+          <div class="vc-row">
+            <span>343 files · all agents live</span>
+            <span class="pill p-ok">build</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div class="card-h"><div class="ch-dot" style="background:var(--a1)"></div>Open Decisions (MGMT.md)</div>
+        <div class="row-item">
+          <div><div class="row-label">D-002 — ISA certification path</div><div class="row-sub">Certify / hire certified / county-only · gates all St. Louis city work</div></div>
+          <span class="pill p-danger">blocker</span>
+        </div>
+        <div class="row-item">
+          <div><div class="row-label">D-004 — Fundraising venture</div><div class="row-sub">Which venture does the fundraising track serve?</div></div>
+          <span class="pill p-warn">open</span>
+        </div>
+        <div class="row-item">
+          <div><div class="row-label">D-003 — Launch service scope</div><div class="row-sub">Trim-only vs trim+removal for TreeService launch</div></div>
+          <span class="pill p-warn">open</span>
+        </div>
+        <div class="row-item">
+          <div><div class="row-label">D-001 — First target segment</div><div class="row-sub">Residential vs HOA/commercial — cash speed vs recurring</div></div>
+          <span class="pill p-warn">open</span>
+        </div>
+      </div>
+    </div><!-- /projects -->
+
+    <!-- ── ACTIONS ── -->
+    <div class="panel" id="panel-actions">
+      <div class="section-header">
+        <h2>Actions</h2>
+        <span class="section-tag">Open Queue</span>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="ch-dot" style="background:var(--danger)"></div>Urgent</div>
+        <div class="row-item">
+          <div><div class="row-label">Resolve D-002 ISA cert path</div><div class="row-sub">TreeService · gates all city work</div></div>
+          <span class="pill p-danger">Dan</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="ch-dot" style="background:var(--warn)"></div>Open</div>
+        <div class="row-item">
+          <div><div class="row-label">Confirm Fundraising venture (D-004)</div><div class="row-sub">BuildOut is working assumption · needs GM call</div></div>
+          <span class="pill p-warn">Dan</span>
+        </div>
+        <div class="row-item">
+          <div><div class="row-label">Populate budget figures</div><div class="row-sub">Finance agent blocked waiting on inputs</div></div>
+          <span class="pill p-warn">Dan</span>
+        </div>
+        <div class="row-item">
+          <div><div class="row-label">Activate Tier-1 scheduled tasks in Cowork</div><div class="row-sub">chamberlain-daily · morning-digest · email-triage · intake · action-item-assignment</div></div>
+          <span class="pill p-warn">Dan · Cowork</span>
+        </div>
+        <div class="row-item">
+          <div><div class="row-label">Review Patent 1 (Hoen Ventures)</div><div class="row-sub">OneDrive · DM_Venture · Hoen Ventures LLC</div></div>
+          <span class="pill p-muted">Dan</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="ch-dot" style="background:var(--ink3)"></div>Pending — Manual PowerShell</div>
+        <div class="row-item">
+          <div><div class="row-label">Remove-Item "C:\Obsidian Vault\prompts" -Recurse -Force</div><div class="row-sub">Moved to RESEARCH/Prompts/ — delete source folder</div></div>
+          <span class="pill p-muted">manual</span>
+        </div>
+        <div class="row-item">
+          <div><div class="row-label">Delete C:\Op_Controls\, C:\Obsidian-Vault-Bootstrap\, C:\ZYN_Temp\</div><div class="row-sub">Archived · safe to remove</div></div>
+          <span class="pill p-muted">manual</span>
+        </div>
+        <div class="row-item">
+          <div><div class="row-label">Drag 5 .skill files into Cowork</div><div class="row-sub">OP_CONTROLS/skill-source/ · auditor · mechanic · operations · chamberlain · conductor</div></div>
+          <span class="pill p-muted">Dan · Cowork</span>
+        </div>
+      </div>
+    </div><!-- /actions -->
+
+    <!-- ── FOCUS (Pomodoro) ── -->
+    <div class="panel" id="panel-focus">
+      <div class="section-header">
+        <h2>Focus Timer</h2>
+        <span class="section-tag">Pomodoro</span>
+      </div>
+      <div class="g2">
+        <div class="card" style="text-align:center">
+          <div class="card-h" style="justify-content:center"><div class="ch-dot" style="background:var(--t1)"></div><span id="pomo-mode-label">Focus Session</span></div>
+          <div class="pomo-ring" id="pomo-ring">
+            <div class="pomo-inner">
+              <div class="pomo-time" id="pomo-display">25:00</div>
+              <div class="pomo-label" id="pomo-sublabel">ready</div>
+            </div>
+          </div>
+          <div class="pomo-controls">
+            <button class="btn" id="pomo-btn" onclick="togglePomo()">▶ Start</button>
+            <button class="btn danger sm" onclick="resetPomo()">↺ Reset</button>
+          </div>
+          <div class="pomo-presets">
+            <button class="preset-btn active" onclick="setPomoPreset(25,5,this)" data-preset="25">25/5</button>
+            <button class="preset-btn" onclick="setPomoPreset(50,10,this)" data-preset="50">50/10</button>
+            <button class="preset-btn" onclick="setPomoPreset(90,15,this)" data-preset="90">90/15</button>
+          </div>
+          <div class="pomo-sessions" id="pomo-sessions">Sessions today: 0 · Total focus: 0 min</div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><div class="ch-dot" style="background:var(--v1)"></div>Session Log</div>
+          <div id="pomo-log" style="font-size:.78rem;color:var(--ink3);line-height:1.8">
+            <div>No sessions yet. Start a timer to log focus blocks.</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /focus -->
+
+    <!-- ── NOTES ── -->
+    <div class="panel" id="panel-notes">
+      <div class="section-header">
+        <h2>Quick Notes</h2>
+        <span class="section-tag">Auto-saved</span>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="ch-dot" style="background:var(--v2)"></div>Scratch Pad <span class="notes-saved" id="notes-saved">✓ saved</span></div>
+        <textarea class="notes-area" id="notes-area" placeholder="Dump thoughts here — auto-saved locally…"></textarea>
+        <div class="notes-bar">
+          <button class="btn sm" onclick="clearNotes()">Clear</button>
+          <button class="btn sm primary" onclick="copyNotes()">Copy to clipboard</button>
+          <span id="notes-count" style="font-size:.68rem;color:var(--ink3);margin-left:auto">0 chars</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="ch-dot" style="background:var(--t1)"></div>Pinned Notes</div>
+        <div id="pinned-notes">
+          <div style="color:var(--ink3);font-size:.8rem">
+            Hold Shift+Enter in scratch pad then click "Pin" to save a note here.
+          </div>
+        </div>
+        <div class="notes-bar" style="margin-top:10px">
+          <button class="btn sm" onclick="pinNote()">📌 Pin current note</button>
+        </div>
+      </div>
+    </div><!-- /notes -->
+
+    <!-- ── HABITS ── -->
+    <div class="panel" id="panel-habits">
+      <div class="section-header">
+        <h2>Habit Tracker</h2>
+        <span class="section-tag">7-Day View</span>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="ch-dot" style="background:var(--t2)"></div>This Week</div>
+        <div style="display:flex;justify-content:flex-end;gap:5px;margin-bottom:6px;" id="habit-day-labels"></div>
+        <div id="habits-list"></div>
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="new-habit" placeholder="Add habit…" style="flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--ink);font:inherit;font-size:.8rem;outline:none;min-width:120px">
+          <button class="btn sm primary" onclick="addHabit()">+ Add</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-h"><div class="ch-dot" style="background:var(--v1)"></div>Week Summary</div>
+        <div id="habit-summary" style="font-size:.82rem;color:var(--ink2)">Complete habits above to see your streak summary.</div>
+      </div>
+    </div><!-- /habits -->
+
+    <!-- ── COUNTDOWN ── -->
+    <div class="panel" id="panel-countdown">
+      <div class="section-header">
+        <h2>Countdown</h2>
+        <span class="section-tag">Key Dates</span>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="ch-dot" style="background:var(--v1)"></div>Upcoming Dates</div>
+        <div id="countdown-list"></div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-h"><div class="ch-dot" style="background:var(--t1)"></div>Add Date</div>
+        <div style="display:grid;gap:8px">
+          <input id="cd-label" placeholder="Label (e.g. Quarterly review)" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--ink);font:inherit;font-size:.8rem;outline:none">
+          <input id="cd-date" type="date" style="background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;color:var(--ink);font:inherit;font-size:.8rem;outline:none">
+          <button class="btn primary" onclick="addCountdown()">+ Add</button>
+        </div>
+      </div>
+    </div><!-- /countdown -->
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+// ═══════════════════════════════════════════
+//  CODEX v2 — Daily Hub JS
+// ═══════════════════════════════════════════
+
+// ── Clock ──
+function updateClock() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+  const d = now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  document.getElementById('clock').textContent = t;
+  document.getElementById('date-display').textContent = d;
+
+  const h = now.getHours();
+  const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting').textContent = `${greet}, Dan`;
+
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  document.getElementById('day-tag').textContent = days[now.getDay()];
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Panel switching ──
+function switchPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'schedule' && !scheduleLoaded) loadSchedule();
+  if (id === 'today' && !todayLoaded) loadTodayEvents();
+}
+
+// ── Calendar: load today's events ──
+let todayLoaded = false;
+
+async function loadTodayEvents() {
+  const el = document.getElementById('today-events');
+  el.innerHTML = '<div style="color:var(--ink3);font-size:.82rem;padding:10px 0">Loading…</div>';
+
+  try {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate()+1).toISOString();
+
+    const res = await window.cowork.callMcpTool('mcp__6ab08af7-5582-42be-9680-7a6990cb2c96__list_events', {
+      time_min: start,
+      time_max: end,
+      max_results: 20
+    });
+
+    const data = res.structuredContent ?? JSON.parse(res.content[0].text);
+    const items = data.items || data.events || data || [];
+
+    document.getElementById('stat-events').textContent = items.length;
+
+    if (!items.length) {
+      el.innerHTML = '<div style="color:var(--ink3);font-size:.82rem;padding:10px 0">No events today.</div>';
+      todayLoaded = true;
+      return;
+    }
+
+    const colors = ['#7c5cfc','#5ce8d4','#fc5c8c','#fcb97c','#5c9efc'];
+    el.innerHTML = items.map((ev, i) => {
+      const start = ev.start?.dateTime || ev.start?.date || '';
+      const timeStr = start ? new Date(start).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}) : 'All day';
+      const color = colors[i % colors.length];
+      return `<div class="event-item">
+        <div class="event-time">${timeStr}</div>
+        <div class="event-dot" style="background:${color}"></div>
+        <div>
+          <div class="event-title">${ev.summary || ev.title || 'Untitled'}</div>
+          <div class="event-cal">${ev.organizer?.displayName || ev.calendar || 'Calendar'}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    todayLoaded = true;
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--ink3);font-size:.8rem;padding:10px 0">
+      Calendar unavailable — <a href="#" onclick="loadTodayEvents()" style="color:var(--t1)">retry</a><br>
+      <span style="color:var(--ink3)">${e.message || e}</span>
+    </div>`;
+  }
+}
+
+// ── Schedule: 7-day view ──
+let scheduleLoaded = false;
+
+async function loadSchedule() {
+  const el = document.getElementById('schedule-content');
+  el.innerHTML = '<div style="color:var(--ink3);font-size:.82rem;padding:10px 0">Loading schedule…</div>';
+
+  try {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const end   = new Date(now.getFullYear(), now.getMonth(), now.getDate()+7).toISOString();
+
+    const res = await window.cowork.callMcpTool('mcp__6ab08af7-5582-42be-9680-7a6990cb2c96__list_events', {
+      time_min: start,
+      time_max: end,
+      max_results: 50
+    });
+
+    const data = res.structuredContent ?? JSON.parse(res.content[0].text);
+    const items = data.items || data.events || data || [];
+
+    if (!items.length) {
+      el.innerHTML = '<div style="color:var(--ink3);font-size:.82rem;padding:10px 0">No events in the next 7 days.</div>';
+      scheduleLoaded = true;
+      return;
+    }
+
+    // Group by day
+    const byDay = {};
+    items.forEach(ev => {
+      const d = (ev.start?.dateTime || ev.start?.date || '').slice(0,10);
+      if (!byDay[d]) byDay[d] = [];
+      byDay[d].push(ev);
+    });
+
+    const colors = ['#7c5cfc','#5ce8d4','#fc5c8c','#fcb97c','#5c9efc'];
+    let html = '';
+    Object.keys(byDay).sort().forEach(day => {
+      const d = new Date(day + 'T12:00:00');
+      const label = d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+      html += `<div style="font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--v2);margin:12px 0 6px;padding-bottom:5px;border-bottom:1px solid var(--border)">${label}</div>`;
+      byDay[day].forEach((ev, i) => {
+        const st = ev.start?.dateTime || ev.start?.date || '';
+        const timeStr = st.includes('T') ? new Date(st).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}) : 'All day';
+        const color = colors[i % colors.length];
+        html += `<div class="event-item">
+          <div class="event-time">${timeStr}</div>
+          <div class="event-dot" style="background:${color}"></div>
+          <div>
+            <div class="event-title">${ev.summary || ev.title || 'Untitled'}</div>
+            <div class="event-cal">${ev.location || ev.organizer?.displayName || ''}</div>
+          </div>
+        </div>`;
+      });
+    });
+
+    el.innerHTML = html;
+    scheduleLoaded = true;
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--ink3);font-size:.8rem;padding:10px 0">
+      Calendar unavailable — <a href="#" onclick="loadSchedule()" style="color:var(--t1)">retry</a>
+    </div>`;
+  }
+}
+
+// Load today on startup
+loadTodayEvents();
+
+// ═══════════════════════════════════════════
+//  POMODORO
+// ═══════════════════════════════════════════
+let pomoState = {
+  duration: 25 * 60,
+  break: 5 * 60,
+  remaining: 25 * 60,
+  running: false,
+  mode: 'focus',
+  sessions: 0,
+  totalMin: 0,
+  timer: null,
+  log: []
+};
+
+function formatTime(s) {
+  return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+}
+
+function updatePomoUI() {
+  const pct = (1 - pomoState.remaining / (pomoState.mode==='focus' ? pomoState.duration : pomoState.break)) * 100;
+  document.getElementById('pomo-ring').style.setProperty('--pomo-pct', pct + '%');
+  document.getElementById('pomo-display').textContent = formatTime(pomoState.remaining);
+  document.getElementById('pomo-sublabel').textContent = pomoState.running ?
+    (pomoState.mode==='focus' ? 'focusing' : 'break') : 'ready';
+  document.getElementById('pomo-btn').textContent = pomoState.running ? '⏸ Pause' : '▶ Start';
+  document.getElementById('pomo-mode-label').textContent = pomoState.mode==='focus' ? 'Focus Session' : 'Break Time';
+  document.getElementById('stat-pomo').textContent = pomoState.sessions;
+  document.getElementById('pomo-sessions').textContent =
+    `Sessions today: ${pomoState.sessions} · Total focus: ${pomoState.totalMin} min`;
+}
+
+function togglePomo() {
+  if (pomoState.running) {
+    clearInterval(pomoState.timer);
+    pomoState.running = false;
+  } else {
+    pomoState.running = true;
+    pomoState.timer = setInterval(() => {
+      pomoState.remaining--;
+      if (pomoState.remaining <= 0) {
+        clearInterval(pomoState.timer);
+        pomoState.running = false;
+        if (pomoState.mode === 'focus') {
+          pomoState.sessions++;
+          pomoState.totalMin += pomoState.duration / 60;
+          const now = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+          pomoState.log.unshift(`✓ ${pomoState.duration/60}m focus — ${now}`);
+          updatePomoLog();
+          pomoState.mode = 'break';
+          pomoState.remaining = pomoState.break;
+        } else {
+          pomoState.mode = 'focus';
+          pomoState.remaining = pomoState.duration;
+        }
+      }
+      updatePomoUI();
+    }, 1000);
+  }
+  updatePomoUI();
+}
+
+function resetPomo() {
+  clearInterval(pomoState.timer);
+  pomoState.running = false;
+  pomoState.mode = 'focus';
+  pomoState.remaining = pomoState.duration;
+  updatePomoUI();
+}
+
+function setPomoPreset(focus, brk, btn) {
+  clearInterval(pomoState.timer);
+  pomoState.running = false;
+  pomoState.duration = focus * 60;
+  pomoState.break = brk * 60;
+  pomoState.remaining = pomoState.duration;
+  pomoState.mode = 'focus';
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updatePomoUI();
+}
+
+function updatePomoLog() {
+  const el = document.getElementById('pomo-log');
+  if (!pomoState.log.length) {
+    el.innerHTML = '<div>No sessions yet. Start a timer to log focus blocks.</div>';
+    return;
+  }
+  el.innerHTML = pomoState.log.slice(0,10).map(l =>
+    `<div style="color:var(--ink2)">${l}</div>`
+  ).join('');
+}
+
+updatePomoUI();
+
+// ═══════════════════════════════════════════
+//  NOTES
+// ═══════════════════════════════════════════
+const NOTES_KEY = 'codex_v2_notes';
+const PINNED_KEY = 'codex_v2_pinned';
+
+const notesArea = document.getElementById('notes-area');
+notesArea.value = localStorage.getItem(NOTES_KEY) || '';
+updateNotesCount();
+
+let saveTimeout;
+notesArea.addEventListener('input', () => {
+  updateNotesCount();
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    localStorage.setItem(NOTES_KEY, notesArea.value);
+    const saved = document.getElementById('notes-saved');
+    saved.classList.add('show');
+    setTimeout(() => saved.classList.remove('show'), 1500);
+  }, 600);
+});
+
+function updateNotesCount() {
+  document.getElementById('notes-count').textContent = notesArea.value.length + ' chars';
+}
+
+function clearNotes() {
+  if (notesArea.value && !confirm('Clear scratch pad?')) return;
+  notesArea.value = '';
+  localStorage.removeItem(NOTES_KEY);
+  updateNotesCount();
+}
+
+function copyNotes() {
+  navigator.clipboard.writeText(notesArea.value).then(() => {
+    const saved = document.getElementById('notes-saved');
+    saved.textContent = '✓ copied';
+    saved.classList.add('show');
+    setTimeout(() => { saved.classList.remove('show'); saved.textContent = '✓ saved'; }, 1500);
+  });
+}
+
+function pinNote() {
+  const text = notesArea.value.trim();
+  if (!text) return;
+  const pins = JSON.parse(localStorage.getItem(PINNED_KEY) || '[]');
+  pins.unshift({ text: text.slice(0, 200), ts: new Date().toLocaleDateString() });
+  localStorage.setItem(PINNED_KEY, JSON.stringify(pins.slice(0, 10)));
+  renderPinned();
+}
+
+function renderPinned() {
+  const pins = JSON.parse(localStorage.getItem(PINNED_KEY) || '[]');
+  const el = document.getElementById('pinned-notes');
+  if (!pins.length) {
+    el.innerHTML = '<div style="color:var(--ink3);font-size:.8rem">No pinned notes yet.</div>';
+    return;
+  }
+  el.innerHTML = pins.map((p, i) =>
+    `<div class="row-item">
+      <div>
+        <div class="row-label" style="font-size:.8rem;white-space:pre-wrap">${p.text}</div>
+        <div class="row-sub">${p.ts}</div>
+      </div>
+      <button class="btn sm danger" onclick="removePin(${i})">✕</button>
+    </div>`
+  ).join('');
+}
+
+function removePin(i) {
+  const pins = JSON.parse(localStorage.getItem(PINNED_KEY) || '[]');
+  pins.splice(i, 1);
+  localStorage.setItem(PINNED_KEY, JSON.stringify(pins));
+  renderPinned();
+}
+
+renderPinned();
+
+// ═══════════════════════════════════════════
+//  HABITS
+// ═══════════════════════════════════════════
+const HABITS_KEY = 'codex_v2_habits';
+const HABIT_LOG_KEY = 'codex_v2_habit_log';
+
+const DEFAULT_HABITS = ['Morning routine', 'Exercise', 'Read', 'No phone before 9am', 'Journal'];
+
+function getHabits() {
+  return JSON.parse(localStorage.getItem(HABITS_KEY) || JSON.stringify(DEFAULT_HABITS));
+}
+function saveHabits(h) { localStorage.setItem(HABITS_KEY, JSON.stringify(h)); }
+
+function getHabitLog() {
+  return JSON.parse(localStorage.getItem(HABIT_LOG_KEY) || '{}');
+}
+function saveHabitLog(l) { localStorage.setItem(HABIT_LOG_KEY, JSON.stringify(l)); }
+
+function getWeekDates() {
+  const today = new Date();
+  const day = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (day === 0 ? 6 : day - 1));
+  return Array.from({length:7}, (_,i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d.toISOString().slice(0,10);
+  });
+}
+
+const DAY_ABBR = ['M','T','W','T','F','S','S'];
+
+function renderHabits() {
+  const habits = getHabits();
+  const log = getHabitLog();
+  const week = getWeekDates();
+  const today = new Date().toISOString().slice(0,10);
+
+  const labelsEl = document.getElementById('habit-day-labels');
+  labelsEl.innerHTML = week.map((d,i) =>
+    `<div style="width:24px;text-align:center;font-size:.6rem;color:${d===today?'var(--t1)':'var(--ink3)'};font-weight:${d===today?'700':'400'}">${DAY_ABBR[i]}</div>`
+  ).join('');
+
+  const listEl = document.getElementById('habits-list');
+  listEl.innerHTML = habits.map((h, hi) => {
+    const dots = week.map((d,di) => {
+      const done = log[h] && log[h][d];
+      return `<div class="habit-dot ${done?'done':''}" title="${d}" onclick="toggleHabit(${hi},'${d}')">
+        ${done ? '✓' : ''}
+      </div>`;
+    }).join('');
+    return `<div class="habit-row">
+      <div class="habit-name">${h}</div>
+      <div class="habit-dots">${dots}</div>
+      <button class="btn sm" style="margin-left:4px;padding:2px 7px;font-size:.6rem" onclick="removeHabit(${hi})">✕</button>
+    </div>`;
+  }).join('');
+
+  const weekTotal = habits.length * 7;
+  let done = 0;
+  habits.forEach(h => {
+    week.forEach(d => { if (log[h]?.[d]) done++; });
+  });
+  const pct = weekTotal ? Math.round((done/weekTotal)*100) : 0;
+  document.getElementById('habit-summary').innerHTML =
+    `<span style="color:var(--t1);font-weight:700">${done}/${weekTotal}</span> completed this week &nbsp;·&nbsp; <span style="color:var(--t1);font-weight:700">${pct}%</span> consistency`;
+}
+
+function toggleHabit(hi, date) {
+  const habits = getHabits();
+  const log = getHabitLog();
+  const h = habits[hi];
+  if (!log[h]) log[h] = {};
+  log[h][date] = !log[h][date];
+  saveHabitLog(log);
+  renderHabits();
+}
+
+function addHabit() {
+  const inp = document.getElementById('new-habit');
+  const val = inp.value.trim();
+  if (!val) return;
+  const habits = getHabits();
+  habits.push(val);
+  saveHabits(habits);
+  inp.value = '';
+  renderHabits();
+}
+
+function removeHabit(i) {
+  const habits = getHabits();
+  habits.splice(i, 1);
+  saveHabits(habits);
+  renderHabits();
+}
+
+renderHabits();
+
+// ═══════════════════════════════════════════
+//  COUNTDOWN
+// ═══════════════════════════════════════════
+const CD_KEY = 'codex_v2_countdown';
+
+const DEFAULT_DATES = [
+  { label: 'End of Quarter', date: '2026-09-30' },
+  { label: 'End of Year', date: '2026-12-31' },
+];
+
+function getCountdowns() {
+  return JSON.parse(localStorage.getItem(CD_KEY) || JSON.stringify(DEFAULT_DATES));
+}
+function saveCountdowns(c) { localStorage.setItem(CD_KEY, JSON.stringify(c)); }
+
+function daysUntil(dateStr) {
+  const target = new Date(dateStr + 'T00:00:00');
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  return Math.round((target - now) / 86400000);
+}
+
+function renderCountdowns() {
+  const cds = getCountdowns();
+  const el = document.getElementById('countdown-list');
+  if (!cds.length) {
+    el.innerHTML = '<div style="color:var(--ink3);font-size:.8rem">No countdowns yet.</div>';
+    return;
+  }
+  el.innerHTML = cds.map((c,i) => {
+    const d = daysUntil(c.date);
+    const label = d < 0 ? 'passed' : d === 0 ? 'TODAY' : `${d}`;
+    const color = d < 0 ? 'var(--ink3)' : d <= 7 ? 'var(--danger)' : d <= 30 ? 'var(--warn)' : 'var(--ok)';
+    return `<div class="countdown-item">
+      <div>
+        <div class="ci-label">${c.label}</div>
+        <div class="ci-date">${new Date(c.date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+      </div>
+      <div style="text-align:right;display:flex;align-items:center;gap:10px">
+        <div>
+          <div class="ci-days" style="background:linear-gradient(135deg,${color},${color});-webkit-background-clip:text;background-clip:text">${label}</div>
+          <div class="ci-unit">${d < 0 ? '' : d === 0 ? '' : 'days'}</div>
+        </div>
+        <button class="btn sm danger" onclick="removeCountdown(${i})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addCountdown() {
+  const label = document.getElementById('cd-label').value.trim();
+  const date = document.getElementById('cd-date').value;
+  if (!label || !date) return;
+  const cds = getCountdowns();
+  cds.push({ label, date });
+  cds.sort((a,b) => a.date.localeCompare(b.date));
+  saveCountdowns(cds);
+  document.getElementById('cd-label').value = '';
+  document.getElementById('cd-date').value = '';
+  renderCountdowns();
+}
+
+function removeCountdown(i) {
+  const cds = getCountdowns();
+  cds.splice(i, 1);
+  saveCountdowns(cds);
+  renderCountdowns();
+}
+
+renderCountdowns();
+setInterval(renderCountdowns, 60000);
+</script>
+</body>
+</html>

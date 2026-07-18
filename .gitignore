@@ -1,0 +1,2 @@
+# publisher stays local — the public site repo carries only the HTML
+publish-dashboards.ps1

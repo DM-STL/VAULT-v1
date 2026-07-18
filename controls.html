@@ -1,357 +1,445 @@
-<!DOCTYPE html>
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Operating Controls",
+  "schemaVersion": 1,
+  "description": "Snapshot of Dan's vault governance layer — agents, memory files, scheduled tasks, open audit findings, iOS intake pipeline, and canonical paths. Updated 2026-07-18.",
+  "mcpTools": [],
+  "mcpServerNames": []
+}
+</script>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VAULT-v1 | Operating Controls</title>
+<title>Operating Controls</title>
 <style>
-  :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --border: #30363d;
-    --text: #c9d1d9;
-    --muted: #8b949e;
-    --green: #3fb950;
-    --green-dim: #1a3a1f;
-    --yellow: #d29922;
-    --yellow-dim: #3a2a00;
-    --blue: #388bfd;
-    --blue-dim: #0d2050;
-    --purple: #a371f7;
-    --purple-dim: #2a1a4a;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; }
-  a { color: var(--green); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+:root {
+  color-scheme: light;
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --border: #e2ddd8;
+  --text: #1a1a1a;
+  --text2: #555;
+  --text3: #999;
+  --accent: #7c5cfc;
+  --accent2: #5ce8d4;
+  --ok: #16a34a;
+  --ok-bg: #f0fdf4;
+  --ok-border: #bbf7d0;
+  --warn: #ca8a04;
+  --warn-bg: #fefce8;
+  --warn-border: #fde68a;
+  --muted-bg: #f5f5f5;
+  --muted-border: #e5e5e5;
+  --shadow: 0 1px 3px rgba(0,0,0,0.07);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+  --radius: 10px;
+}
 
-  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; align-items: center; gap: 0; position: sticky; top: 0; z-index: 100; }
-  .nav-brand { font-weight: 700; font-size: 15px; color: var(--green); padding: 14px 16px 14px 0; border-right: 1px solid var(--border); margin-right: 4px; letter-spacing: 0.5px; }
-  .nav-link { padding: 14px 14px; color: var(--muted); font-size: 13px; border-bottom: 2px solid transparent; transition: color 0.15s; }
-  .nav-link:hover { color: var(--text); text-decoration: none; }
-  .nav-link.active { color: var(--text); border-bottom-color: var(--green); }
-  .nav-right { margin-left: auto; font-size: 12px; color: var(--muted); padding: 14px 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  .page { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
-  .page-header { margin-bottom: 28px; }
-  .page-header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-  .page-header p { color: var(--muted); font-size: 13px; }
+body {
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+  padding: 20px;
+}
 
-  .section { margin-bottom: 28px; }
-  .section-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.brand-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, #7c5cfc, #5ce8d4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; color: white; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(124,92,252,0.3);
+}
+h1 {
+  font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em;
+  background: linear-gradient(135deg, #7c5cfc, #5ce8d4);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.stamp { color: var(--text3); font-size: .75rem; }
 
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+}
+.grid-wide {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 640px) {
+  .grid-wide { grid-template-columns: 1fr; }
+}
 
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid #2a6a30; }
-  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid #0d3080; }
-  .badge-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid #4a2a8a; }
-  .badge-gray { background: #21262d; color: var(--muted); border: 1px solid var(--border); }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text3);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.card-title span {
+  display: inline-block;
+  width: 8px; height: 8px; border-radius: 50%;
+  margin-right: 6px; vertical-align: middle;
+  position: relative; top: -1px;
+}
 
-  /* AGENT TABLE */
-  .agent-table { width: 100%; border-collapse: collapse; }
-  .agent-table th { text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; padding: 0 0 10px 0; border-bottom: 1px solid var(--border); }
-  .agent-table td { padding: 10px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
-  .agent-table tr:last-child td { border-bottom: none; }
-  .agent-table td:first-child { font-weight: 600; font-size: 13px; color: var(--text); padding-right: 16px; white-space: nowrap; }
-  .agent-table td:nth-child(2) { font-size: 12px; color: var(--muted); padding-right: 16px; }
-  .agent-table td:last-child { font-size: 12px; color: var(--muted); font-style: italic; }
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: .88rem;
+}
+.row:last-child { border-bottom: none; }
+.row-label { color: var(--text2); }
+.row-sub { font-size: .75rem; color: var(--text3); margin-top: 1px; }
 
-  /* SKILL CHIPS */
-  .skill-list { display: flex; flex-wrap: wrap; gap: 6px; }
-  .skill-chip { background: #0d1117; border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; font-size: 11px; color: var(--muted); }
-  .skill-chip.vault { border-color: #2a6a30; color: var(--green); }
+.pill {
+  font-size: .68rem; font-weight: 700;
+  padding: 2px 9px; border-radius: 999px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.pill-ok { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok-border); }
+.pill-warn { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-border); }
+.pill-muted { background: var(--muted-bg); color: var(--text3); border: 1px solid var(--muted-border); }
+.pill-accent { background: rgba(124,92,252,.1); color: #7c5cfc; border: 1px solid rgba(124,92,252,.25); }
 
-  /* RULES */
-  .rule-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .rule-item:last-child { border-bottom: none; }
-  .rule-text { font-size: 13px; color: var(--text); }
-  .rule-why { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+.agent-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.agent-name {
+  font-weight: 700;
+  font-size: .85rem;
+  margin-bottom: 2px;
+  color: var(--text);
+}
+.agent-role {
+  font-size: .72rem;
+  color: var(--text3);
+  line-height: 1.4;
+}
+.agent-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  display: inline-block; margin-right: 5px;
+  background: var(--ok); box-shadow: 0 0 4px var(--ok);
+}
 
-  /* MEMORY FILES */
-  .mem-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
-  .mem-row:last-child { border-bottom: none; }
-  .mem-file { font-size: 13px; color: var(--text); font-family: 'SF Mono', 'Consolas', monospace; flex: 1; }
-  .mem-desc { font-size: 12px; color: var(--muted); }
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+@media (max-width: 500px) {
+  .stats-strip { grid-template-columns: repeat(2, 1fr); }
+}
+.stat-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+}
+.stat-n {
+  font-size: 1.6rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #7c5cfc, #5ce8d4);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  line-height: 1;
+}
+.stat-l {
+  font-size: .72rem;
+  color: var(--text3);
+  margin-top: 3px;
+}
 
-  .updated { font-size: 11px; color: var(--muted); text-align: right; margin-top: 20px; }
+.path-block {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-family: 'Courier New', monospace;
+  font-size: .75rem;
+  color: var(--text2);
+  margin-top: 8px;
+  word-break: break-all;
+}
+
+.section { margin-bottom: 14px; }
+
+footer {
+  margin-top: 20px;
+  text-align: center;
+  color: var(--text3);
+  font-size: .72rem;
+}
 </style>
 </head>
 <body>
 
-<nav>
-  <span class="nav-brand">VAULT-v1</span>
-  <a class="nav-link" href="index.html">Codex</a>
-  <a class="nav-link" href="production.html">Workshop</a>
-  <a class="nav-link active" href="controls.html">Controls</a>
-  <span class="nav-right" id="nav-date"></span>
-</nav>
-
-<div class="page">
-  <div class="page-header">
-    <h1>Operating Controls</h1>
-    <p>Agent roster · Skills · Memory · Rules · OP_CONTROLS system</p>
-  </div>
-
-  <!-- AGENT ROSTER -->
-  <div class="section">
-    <div class="section-label">Agent Roster</div>
-    <div class="card">
-      <table class="agent-table">
-        <thead>
-          <tr>
-            <th>Agent</th>
-            <th>Skill trigger</th>
-            <th>Role</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>X11</td>
-            <td>/x11 · "scaffold this"</td>
-            <td>Command center · routes all workspace changes</td>
-          </tr>
-          <tr>
-            <td>Chamberlain</td>
-            <td>/chamberlain · "brief me"</td>
-            <td>Vault intelligence · read-only codex</td>
-          </tr>
-          <tr>
-            <td>Conductor</td>
-            <td>/conductor · complex multi-skill tasks</td>
-            <td>Skill orchestrator · routes to right agents</td>
-          </tr>
-          <tr>
-            <td>Auditor</td>
-            <td>/auditor · "audit my skills"</td>
-            <td>Vault health · live skill grading · integrity</td>
-          </tr>
-          <tr>
-            <td>Mechanic</td>
-            <td>/mechanic · "fix a skill"</td>
-            <td>Skill engineer · builds/repairs .skill files</td>
-          </tr>
-          <tr>
-            <td>Registrar</td>
-            <td>/registrar · "ops" · "operations"</td>
-            <td>Vault operations · CLAUDE.md · memory · SOPs</td>
-          </tr>
-          <tr>
-            <td>Wrap-Up</td>
-            <td>/wrap-up · "end session"</td>
-            <td>Session close · memory capture · daily log</td>
-          </tr>
-          <tr>
-            <td>Scout</td>
-            <td>/scout · "brief me" · "what's happening"</td>
-            <td>Intelligence sweep · Gmail + Calendar + vault</td>
-          </tr>
-          <tr>
-            <td>Projects</td>
-            <td>/projects · "venture status"</td>
-            <td>Venture register · project tracking · next moves</td>
-          </tr>
-          <tr>
-            <td>Archivist</td>
-            <td>/archivist research · /archivist pull</td>
-            <td>Research · web scrape → RESEARCH/Active/</td>
-          </tr>
-          <tr>
-            <td>Bursar</td>
-            <td>/bursar · "budget" · "finances"</td>
-            <td>Financial intelligence · budget · venture modeling</td>
-          </tr>
-          <tr>
-            <td>Foreman</td>
-            <td>/foreman</td>
-            <td>Build execution · PRODUCTION factory tasks</td>
-          </tr>
-          <tr>
-            <td>Workflow-Creator</td>
-            <td>/workflow-creator · "create a workflow"</td>
-            <td>Workflow design · run · index · OP_CONTROLS/workflows/</td>
-          </tr>
-        </tbody>
-      </table>
+<div class="header">
+  <div class="header-left">
+    <div class="brand-icon">🛡️</div>
+    <div>
+      <h1>Operating Controls</h1>
+      <div class="stamp">OP_CONTROLS · Obsidian Vault · Hierarchy v14</div>
     </div>
   </div>
-
-  <!-- INSTALLED SKILLS -->
-  <div class="section">
-    <div class="section-label">Installed Skills — Custom Vault (Pointer Pattern)</div>
-    <div class="card">
-      <div class="skill-list">
-        <span class="skill-chip vault">x11</span>
-        <span class="skill-chip vault">chamberlain</span>
-        <span class="skill-chip vault">conductor</span>
-        <span class="skill-chip vault">auditor</span>
-        <span class="skill-chip vault">mechanic</span>
-        <span class="skill-chip vault">registrar</span>
-        <span class="skill-chip vault">wrap-up</span>
-        <span class="skill-chip vault">scout</span>
-        <span class="skill-chip vault">projects</span>
-        <span class="skill-chip vault">archivist</span>
-        <span class="skill-chip vault">bursar</span>
-        <span class="skill-chip vault">foreman</span>
-        <span class="skill-chip vault">workflow-creator</span>
-        <span class="skill-chip vault">run-prompt</span>
-        <span class="skill-chip vault">create-prompt</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-label">Installed Skills — General</div>
-    <div class="card">
-      <div class="skill-list">
-        <span class="skill-chip">copywriting</span>
-        <span class="skill-chip">offer-creation</span>
-        <span class="skill-chip">cold-outreach</span>
-        <span class="skill-chip">pricing-strategy</span>
-        <span class="skill-chip">landing-pages</span>
-        <span class="skill-chip">fundraising</span>
-        <span class="skill-chip">automation-workflows</span>
-        <span class="skill-chip">social-media</span>
-        <span class="skill-chip">docx</span>
-        <span class="skill-chip">pptx</span>
-        <span class="skill-chip">pdf</span>
-        <span class="skill-chip">xlsx</span>
-        <span class="skill-chip">canvas-design</span>
-        <span class="skill-chip">algorithmic-art</span>
-        <span class="skill-chip">mcp-builder</span>
-        <span class="skill-chip">doc-coauthoring</span>
-        <span class="skill-chip">schedule</span>
-        <span class="skill-chip">info-intake</span>
-        <span class="skill-chip">internal-comms</span>
-        <span class="skill-chip">web-builder</span>
-        <span class="skill-chip">skill-auditor</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- MEMORY FILES -->
-  <div class="section">
-    <div class="section-label">Memory Files — OP_CONTROLS/Memory/</div>
-    <div class="card">
-      <div class="mem-row">
-        <div>
-          <div class="mem-file">user-profile.md</div>
-          <div class="mem-desc">Dan's role, background, preferences, working style</div>
-        </div>
-      </div>
-      <div class="mem-row">
-        <div>
-          <div class="mem-file">project-context.md</div>
-          <div class="mem-desc">Active ventures, skill setup, key file locations</div>
-        </div>
-      </div>
-      <div class="mem-row">
-        <div>
-          <div class="mem-file">feedback-rules.md</div>
-          <div class="mem-desc">Established behavior rules — applied every session</div>
-        </div>
-      </div>
-      <div class="mem-row">
-        <div>
-          <div class="mem-file">chamberlain-state.md</div>
-          <div class="mem-desc">Vault snapshot written by Chamberlain on each run</div>
-        </div>
-      </div>
-      <div class="mem-row">
-        <div>
-          <div class="mem-file">audit-state.md</div>
-          <div class="mem-desc">Open audit findings and resolution log</div>
-        </div>
-      </div>
-      <div class="mem-row">
-        <div>
-          <div class="mem-file">daily/YYYY-MM-DD.md</div>
-          <div class="mem-desc">Per-session logs written by Wrap-Up</div>
-        </div>
-      </div>
-      <div class="mem-row">
-        <div>
-          <div class="mem-file">SOUL.md</div>
-          <div class="mem-desc">Personality layer — how Claude shows up in this vault</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- KEY RULES -->
-  <div class="section">
-    <div class="section-label">Active Behavior Rules</div>
-    <div class="card">
-      <div class="rule-item">
-        <div class="rule-text">No bullet points in conversational responses — prose only</div>
-        <div class="rule-why">Bullets feel like overhead, not answers</div>
-      </div>
-      <div class="rule-item">
-        <div class="rule-text">No recaps after completing work</div>
-        <div class="rule-why">Dan can see what was done — restating wastes time</div>
-      </div>
-      <div class="rule-item">
-        <div class="rule-text">Make judgment calls without asking</div>
-        <div class="rule-why">Dan moves fast — only ask when getting it wrong wastes significant effort</div>
-      </div>
-      <div class="rule-item">
-        <div class="rule-text">Deliver files, don't describe them</div>
-        <div class="rule-why">The file is the deliverable — always create + present_files</div>
-      </div>
-      <div class="rule-item">
-        <div class="rule-text">All skills use the pointer pattern — no exceptions</div>
-        <div class="rule-why">SKILL.md = trigger description + pointer to agent file. Instructions live in the agent .md file</div>
-      </div>
-      <div class="rule-item">
-        <div class="rule-text">Never read _archive/ folders</div>
-        <div class="rule-why">Archive = stale. Reading contaminates context</div>
-      </div>
-      <div class="rule-item">
-        <div class="rule-text">Outputs go to PRODUCTION/FACTORY/KITCHEN/Output/</div>
-        <div class="rule-why">Organized, OneDrive-synced, findable</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- VAULT SYSTEMS -->
-  <div class="section">
-    <div class="section-label">Vault Systems</div>
-    <div class="grid-2">
-      <div class="card" style="padding:14px;">
-        <div style="font-weight:600;font-size:13px;margin-bottom:8px;">HOME</div>
-        <div style="font-size:12px;color:var(--muted);">Landing page, daily brief, dashboards. Entry point for every session.</div>
-      </div>
-      <div class="card" style="padding:14px;">
-        <div style="font-weight:600;font-size:13px;margin-bottom:8px;">RESEARCH</div>
-        <div style="font-size:12px;color:var(--muted);">Active research threads. Archivist writes here. Staging → LIBRARY.</div>
-      </div>
-      <div class="card" style="padding:14px;">
-        <div style="font-weight:600;font-size:13px;margin-bottom:8px;">LIBRARY</div>
-        <div style="font-size:12px;color:var(--muted);">Permanent reference. SOPs, standards, decision log, UI system.</div>
-      </div>
-      <div class="card" style="padding:14px;">
-        <div style="font-weight:600;font-size:13px;margin-bottom:8px;">OP_CONTROLS</div>
-        <div style="font-size:12px;color:var(--muted);">Governance layer. CLAUDE.md, memory files, skill source, workflows.</div>
-      </div>
-      <div class="card" style="padding:14px;">
-        <div style="font-weight:600;font-size:13px;margin-bottom:8px;">PRODUCTION</div>
-        <div style="font-size:12px;color:var(--muted);">Factory zones (KITCHEN, MGMT). Agents: GM, Head Chef, Foreman.</div>
-      </div>
-      <div class="card" style="padding:14px;">
-        <div style="font-weight:600;font-size:13px;margin-bottom:8px;">PROJECTS</div>
-        <div style="font-size:12px;color:var(--muted);">Active ventures. TreeService, BuildOut, Hoen, Fundraising, Agentic OS.</div>
-      </div>
-    </div>
-  </div>
-
-  <p class="updated">Snapshot: June 27, 2026 · Refresh by running /x11 in Cowork</p>
+  <div class="stamp" id="stamp">Updated 2026-07-18 · auditor refresh</div>
 </div>
 
-<script>
-  const d = new Date();
-  document.getElementById('nav-date').textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-</script>
+<!-- Stats strip -->
+<div class="stats-strip">
+  <div class="stat-box">
+    <div class="stat-n">6</div>
+    <div class="stat-l">Governance agents</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-n">8</div>
+    <div class="stat-l">Memory files live</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-n">508</div>
+    <div class="stat-l">Vault .md files</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-n">20</div>
+    <div class="stat-l">Scheduled tasks active</div>
+  </div>
+</div>
+
+<!-- Governance Agents -->
+<div class="card section">
+  <div class="card-title"><span style="background:#7c5cfc"></span>Governance Agents</div>
+  <div class="agent-grid">
+    <div class="agent-item">
+      <div class="agent-name"><span class="agent-dot"></span>Chamberlain</div>
+      <div class="agent-role">Intelligence layer · codex · workspace briefing</div>
+    </div>
+    <div class="agent-item">
+      <div class="agent-name"><span class="agent-dot"></span>Conductor</div>
+      <div class="agent-role">Request routing · skill orchestration</div>
+    </div>
+    <div class="agent-item">
+      <div class="agent-name"><span class="agent-dot"></span>Auditor</div>
+      <div class="agent-role">Skill health · instruction file freshness</div>
+    </div>
+    <div class="agent-item">
+      <div class="agent-name"><span class="agent-dot"></span>Mechanic</div>
+      <div class="agent-role">Skill creation · modification · evals</div>
+    </div>
+    <div class="agent-item">
+      <div class="agent-name"><span class="agent-dot"></span>Ops</div>
+      <div class="agent-role">SOP/memory writes · workspace config · scaffolding (replaced Registrar)</div>
+    </div>
+    <div class="agent-item">
+      <div class="agent-name"><span class="agent-dot"></span>Vault Operator</div>
+      <div class="agent-role">Obsidian plugin · local file agent · iOS intake · handoff zone</div>
+    </div>
+  </div>
+</div>
+
+<!-- Memory + Governance files -->
+<div class="grid-wide section">
+  <div class="card">
+    <div class="card-title"><span style="background:#5ce8d4"></span>Memory Files — OP_CONTROLS/Memory/</div>
+    <div class="row"><span class="row-label">user-profile.md</span><span class="pill pill-ok">live</span></div>
+    <div class="row"><span class="row-label">feedback-rules.md</span><span class="pill pill-ok">live</span></div>
+    <div class="row"><span class="row-label">project-context.md</span><span class="pill pill-ok">live</span></div>
+    <div class="row"><span class="row-label">audit-state.md</span><span class="pill pill-ok">live</span></div>
+    <div class="row"><span class="row-label">chamberlain-state.md</span><span class="pill pill-ok">live · rewritten 2026-06-28 (AUD-026)</span></div>
+    <div class="row"><span class="row-label">MEMORY.md</span><span class="pill pill-ok">live</span></div>
+    <div class="row"><span class="row-label">learn-knowledge-map.md</span><span class="pill pill-ok">live</span></div>
+    <div class="row"><span class="row-label">SOUL.md</span><span class="pill">live — OP_CONTROLS/SOUL.md (AUD-043 was a false finding; reverted to autonomy version 2026-07-18)</span></div>
+    <div class="row"><span class="row-label">workflows/WORKFLOWS.md</span><span class="pill pill-ok">live</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span style="background:#fc7c7c"></span>Governance Layer</div>
+    <div class="row"><span class="row-label">CLAUDE.md (root)</span><span class="pill pill-ok">redirects to OP_CONTROLS</span></div>
+    <div class="row"><span class="row-label">OP_CONTROLS/CLAUDE.md</span><span class="pill pill-ok">canonical · Vault Operator added</span></div>
+    <div class="row"><span class="row-label">Anti-patterns.md</span><span class="pill pill-ok">live · 17 rules</span></div>
+    <div class="row"><span class="row-label">Skills installed</span><span class="pill pill-ok">all skills live in Cowork</span></div>
+    <div class="row"><span class="row-label">iOS intake pipeline</span><span class="pill pill-ok">active · VO-SORT → Gmail</span></div>
+    <div class="row"><span class="row-label">Vault restructure</span><span class="pill pill-ok">complete 2026-06-27</span></div>
+    <div class="row"><span class="row-label">Path migration</span><span class="pill pill-ok">all agents updated</span></div>
+    <div class="row"><span class="row-label">Cross-link audit</span><span class="pill pill-ok">350+ files · PASS</span></div>
+  </div>
+</div>
+
+<!-- Vault Structure -->
+<div class="card section">
+  <div class="card-title"><span style="background:#5c9efc"></span>Vault Structure — 6 Peer Systems</div>
+  <div class="row">
+    <div><div class="row-label">HOME</div><div class="row-sub">Daily notes · inbox · Codex · Dashboard · goals</div></div>
+    <span class="pill pill-ok">active</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">RESEARCH</div><div class="row-sub">Active → Staging → LIBRARY · Prompts</div></div>
+    <span class="pill pill-ok">active</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">LIBRARY</div><div class="row-sub">Decisions · References · Research · SOPs · Standards · Archives</div></div>
+    <span class="pill pill-ok">active — iOS intake routes here</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">OP_CONTROLS</div><div class="row-sub">Governance · Agents · Memory · Monitors · Skills</div></div>
+    <span class="pill pill-ok">active</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">PRODUCTION</div><div class="row-sub">FACTORY (MANAGEMENT · KITCHEN · FLOOR) · Agents · Dashboard</div></div>
+    <span class="pill pill-ok">active</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">PROJECTS</div><div class="row-sub">Paper-Entitlements · Shopify-Manager · The-Capital-Stack · Archive</div></div>
+    <span class="pill pill-ok">active</span>
+  </div>
+</div>
+
+<!-- Scheduled Tasks -->
+<div class="card section">
+  <div class="card-title"><span style="background:#5ce8d4"></span>Scheduled Tasks — 20 Active</div>
+  <div class="row">
+    <span class="row-label">ios-sort-daily-vault</span>
+    <span class="pill pill-ok">daily 7am · Gmail VO-SORT scan</span>
+  </div>
+  <div class="row">
+    <span class="row-label">codex-daily-refresh-vault</span>
+    <span class="pill pill-ok">daily ~6am · Codex.md snapshot</span>
+  </div>
+  <div class="row">
+    <span class="row-label">dashboard-date-update-vault</span>
+    <span class="pill pill-warn">daily ~6am · OPS-027 merge candidate with codex refresh — NOT superseded (distinct outputs)</span>
+  </div>
+  <div class="row">
+    <span class="row-label">Life OS suite (12)</span>
+    <span class="pill pill-ok">morning digest · AM/PM email triage · weekday knowledge/projects · Fri/Sun reviews · Sun finance · monthly audit + net-worth · wedding 7-day</span>
+  </div>
+  <div class="row">
+    <span class="row-label">Docket weekly reviews (2)</span>
+    <span class="pill pill-ok">Friday + Sunday</span>
+  </div>
+  <div class="row">
+    <span class="row-label">intake · action-item-assignment · desi-action</span>
+    <span class="pill pill-ok">active</span>
+  </div>
+</div>
+
+<!-- Open Items -->
+<div class="card section">
+  <div class="card-title"><span style="background:#fcb97c"></span>Open Items — Audit Findings</div>
+  <div class="row">
+    <div><div class="row-label">AUD-025 (P1) — Scout skill stale description</div><div class="row-sub">Reinstall needed · MECH-001 queued</div></div>
+    <span class="pill pill-warn">open</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">AUD-029 (P1) — /ops + /operations broken</div><div class="row-sub">operations/SKILL.md dead pointer · MECH-002 queued</div></div>
+    <span class="pill pill-warn">open</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">AUD-036 (P2) — recurring-prompt archive bug</div><div class="row-sub">Run-Prompt SOP archives recurring prompts (ios-sort-now) · needs recurring flag</div></div>
+    <span class="pill pill-warn">open</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">AUD-037 (P2) — Vault-Changelog one-writer violation</div><div class="row-sub">Plugin-owned file; Claude must not append directly</div></div>
+    <span class="pill pill-warn">open</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">AUD-039 (P2) — project-context.md skill inventory stale</div><div class="row-sub">Route → /ops rewrite to live state</div></div>
+    <span class="pill pill-warn">open</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">AUD-040 (P2) — deactivate registrar + consolidate-memory skills</div><div class="row-sub">Dan action · Cowork Settings → Skills</div></div>
+    <span class="pill pill-warn">open</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">AUD-042 (P3) — OS-Instructions §2 missing skill rows</div><div class="row-sub">graph · create-prompt · run-prompt · workflow-creator</div></div>
+    <span class="pill pill-warn">open</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">AUD-043 (P2) — CLOSED 2026-07-18 (false finding)</div><div class="row-sub">SOUL.md exists at OP_CONTROLS/SOUL.md — the audit checked OP_CONTROLS/Memory/. Reverted to autonomy version under prompt 005</div></div>
+    <span class="pill pill-warn">open · new 2026-07-18</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">OPS-027 (P2) — dashboard + codex ~6am overlap</div><div class="row-sub">Merge candidate · distinct outputs verified 2026-07-18 · pending Dan</div></div>
+    <span class="pill pill-warn">open</span>
+  </div>
+  <div class="row">
+    <span class="row-label">Reconnect Gmail with write permissions</span>
+    <span class="pill pill-warn">Dan action · for VO-processed labels</span>
+  </div>
+  <div class="row">
+    <span class="row-label">Connect Microsoft 365 for Outlook VO-SORT</span>
+    <span class="pill pill-warn">Dan action · Settings → Connectors</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">2026-07-18 — vault-pollution incident cleaned</div><div class="row-sub">coworkUserFilesPath misdirect → runtime dump in vault root · quarantined + .gitignore safety net · full record in audit-state.md</div></div>
+    <span class="pill pill-ok">resolved · 2026-07-18</span>
+  </div>
+</div>
+
+<!-- Canonical paths -->
+<div class="card section">
+  <div class="card-title"><span style="background:#b47cfc"></span>Canonical Paths</div>
+  <div class="row"><span class="row-label">Vault root</span><div class="path-block">C:\Obsidian Vault\</div></div>
+  <div class="row"><span class="row-label">Session instructions</span><div class="path-block">C:\Obsidian Vault\OP_CONTROLS\CLAUDE.md</div></div>
+  <div class="row"><span class="row-label">Memory</span><div class="path-block">C:\Obsidian Vault\OP_CONTROLS\Memory\</div></div>
+  <div class="row"><span class="row-label">Codex</span><div class="path-block">C:\Obsidian Vault\HOME\Codex.md</div></div>
+  <div class="row"><span class="row-label">iOS sort prompt</span><div class="path-block">C:\Obsidian Vault\prompts\ios-sort-now.md</div></div>
+  <div class="row"><span class="row-label">iOS sort script</span><div class="path-block">C:\Obsidian Vault\OP_CONTROLS\Automation\ios-sort.py</div></div>
+  <div class="row"><span class="row-label">Vault changelog</span><div class="path-block">C:\Obsidian Vault\EXTERNAL\Handoff\changelog\Vault-Changelog.md</div></div>
+  <div class="row"><span class="row-label">iOS intake log</span><div class="path-block">C:\Obsidian Vault\EXTERNAL\Handoff\changelog\changelog-handoff-log.md</div></div>
+</div>
+
+<!-- iOS Intake -->
+<div class="card section">
+  <div class="card-title"><span style="background:#5ce8d4"></span>iOS Intake Pipeline</div>
+  <div class="row"><span class="row-label">Send to</span><span style="font-family:monospace;font-size:.8rem">danmccauleystl@gmail.com</span></div>
+  <div class="row"><span class="row-label">Subject</span><span style="font-family:monospace;font-size:.8rem">VO-SORT</span></div>
+  <div class="row"><span class="row-label">Body line 1</span><span style="font-family:monospace;font-size:.8rem">YYYY-MM-DD-HH:mm</span></div>
+  <div class="row"><span class="row-label">Classification</span><span class="row-label">task · venture · finance · research · goals · general</span></div>
+  <div class="row"><span class="row-label">Auto-sort</span><span class="pill pill-ok">daily 7am (ios-sort-daily)</span></div>
+  <div class="row"><span class="row-label">On demand</span><span class="row-label">"run ios-sort-now" in Cowork</span></div>
+</div>
+
+<footer>Operating Controls · Obsidian Vault · Hierarchy v14 · 2026-06-28 · synced with audit-state.md</footer>
+
 </body>
 </html>

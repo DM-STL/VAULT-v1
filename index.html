@@ -222,7 +222,7 @@ footer {
       <div class="stamp">OP_CONTROLS · Obsidian Vault · Hierarchy v14</div>
     </div>
   </div>
-  <div class="stamp" id="stamp">Updated 2026-08-29 · post-governance refresh</div>
+  <div class="stamp" id="stamp">Updated 2026-10-28 · go-live refresh after a 58-day dormancy (08-31 to 10-28)</div>
 </div>
 
 <!-- Stats strip -->
@@ -371,22 +371,30 @@ footer {
 
 <!-- Scheduled Tasks -->
 <div class="card section">
-  <div class="card-title"><span style="background:#5ce8d4"></span>Scheduled Tasks — 14 registered</div>
+  <div class="card-title"><span style="background:#5ce8d4"></span>Scheduled Tasks — 12 registered · 15 on disk</div>
   <div class="row">
     <span class="row-label">Runner</span>
     <span class="pill pill-ok">Claude Code → Routine panel (since 2026-07-18). NOT Cowork — the Cowork registry is correctly empty (OPS-028)</span>
   </div>
   <div class="row">
     <span class="row-label">Daily (5)</span>
-    <span class="pill pill-ok">daily-vault-refresh 06:02 · ios-sort 07:08 · morning-digest 07:19 · AM triage 07:40 · PM triage 14:07</span>
+    <span class="pill pill-ok">daily-vault-refresh 06:04 · ios-sort 07:10 · morning-digest 06:35 · AM triage 08:04 · PM triage 16:01</span>
   </div>
   <div class="row">
     <span class="row-label">Weekly (7)</span>
-    <span class="pill pill-ok">construction-cost research Mon · knowledge Mon/Wed · projects sweep Thu · Fri + Sun reviews · Sun finance</span>
+    <span class="pill pill-ok">construction-cost research Mon 06:31 · knowledge Mon 08:13 · projects sweep Thu 08:01 · Fri review 08:08 · Sun review 10:07</span>
   </div>
   <div class="row">
-    <span class="row-label">Monthly (2)</span>
-    <span class="pill pill-ok">net-worth scaffold · vault health audit</span>
+    <span class="row-label">Monthly (1)</span>
+    <span class="pill pill-ok">vault health audit, 1st 09:00 — last fired 09-02, missed its 10-01 slot during the dormancy; watch the 11-01 fire</span>
+  </div>
+  <div class="row">
+    <span class="row-label">Unregistered (3)</span>
+    <span class="pill pill-warn">vault-wednesday-knowledge · vault-sunday-finance · vault-monthly-net-worth — complete prompts from the 07-18 port that fired on 07-18 and were later dropped from the scheduler. They exist on disk and fire never. Register or archive (AUD-054)</span>
+  </div>
+  <div class="row">
+    <span class="row-label">Versioned</span>
+    <span class="pill pill-ok">Definitions live in %USERPROFILE%\.claude\scheduled-tasks — outside the vault and outside git until 2026-10-28. Now mirrored to OP_CONTROLS/Automation/scheduled-tasks/ · re-sync with sync-scheduled-tasks.ps1 after any edit</span>
   </div>
   <div class="row">
     <span class="row-label">Not recreated</span>
@@ -395,6 +403,39 @@ footer {
   <div class="row">
     <span class="row-label">Firing behaviour</span>
     <span class="pill pill-warn">Tasks run only while the desktop app is open; missed runs fire on next launch. A quiet stretch usually means the app was closed, not a fault. Verify with <code>list_scheduled_tasks</code> — never assume (anti-pattern #12)</span>
+  </div>
+</div>
+
+<!-- Go-live 2026-10-28 -->
+<div class="card section">
+  <div class="card-title"><span style="background:#7cc4fc"></span>Go-Live — 2026-10-28, after a 58-day dormancy</div>
+  <div class="row">
+    <div><div class="row-label">What the gap actually was</div><div class="row-sub">The vault was dormant, not broken. The scheduler caught up in a burst on 10-28. Two things first logged as "unexplained, needs Dan" both trace to one commit, <code>6df6985</code> "Auto wrap-up safety net 2026-08-31": the Dashboard/Codex renames and six plugin-manifest removals were swept in by a blind <code>git add -A</code> with no changelog line.</div></div>
+    <span class="pill pill-ok">root cause closed</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">vault-wrapup-safety-net rewritten</div><div class="row-sub">It was the anti-pattern #16 violator. Step 5 now classifies pending changes, treats renames, deletions and <code>.obsidian/</code> edits as structural, and logs them before committing.</div></div>
+    <span class="pill pill-ok">fixed</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">daily-vault-refresh de-frictioned</div><div class="row-sub">Run logs were written after the publish step, so a publish failure erased the record of an otherwise successful run — twice (AUD-047 on 07-18, again 10-28). Logging now happens first; publish is last and explicitly non-fatal.</div></div>
+    <span class="pill pill-ok">fixed</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">Publishing restored</div><div class="row-sub">First successful publish since 07-18. The token was never the problem: the script preferred a stale inherited <code>$env:GH_DEPLOY_TOKEN</code> over the registry, so a dead token beat a valid one. Separately, <code>index.html</code> was mapped to a file deleted on 08-29, so the front page silently served June content.</div></div>
+    <span class="pill pill-ok">live</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">Offsite backup</div><div class="row-sub">The whole 10-28 session was uncommitted on branch <code>work/2026-09-03</code>. Committed, <code>main</code> fast-forwarded, and pushed — the vault is backed up offsite for the first time since 08-29.</div></div>
+    <span class="pill pill-ok">in sync</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">GH_DEPLOY_TOKEN expires 2027-01-26</div><div class="row-sub">90-day fine-grained PAT, scoped to obsidian-vault + VAULT-v1, Contents read/write. Nothing monitors expiry — that is exactly how the last one died unnoticed. If the dashboards go stale, check this first.</div></div>
+    <span class="pill pill-warn">watch</span>
+  </div>
+  <div class="row">
+    <div><div class="row-label">AUD-055 — Gmail tasks unproven</div><div class="row-sub">The four Gmail-dependent tasks were re-enabled on 10-28 but still report <code>lastRunAt 2026-07-22</code>. The Gmail connector itself was verified live, so the dependency is sound; the tasks still need one real fire to prove themselves (anti-pattern #12/#15).</div></div>
+    <span class="pill pill-warn">open</span>
   </div>
 </div>
 
@@ -458,7 +499,7 @@ footer {
   <div class="row"><span class="row-label">On demand</span><span class="row-label">"run ios-sort-now" in Cowork</span></div>
 </div>
 
-<footer>Operating Controls · Obsidian Vault · Hierarchy v14 · refreshed 2026-08-29 · hand-maintained snapshot — for live state see OP_CONTROLS/Vault-Map.md</footer>
+<footer>Operating Controls · Obsidian Vault · Hierarchy v14 · refreshed 2026-10-28 · hand-maintained snapshot — for live state see OP_CONTROLS/Vault-Map.md</footer>
 
 </body>
 </html>
